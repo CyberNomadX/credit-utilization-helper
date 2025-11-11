@@ -177,6 +177,11 @@
       color: var(--subtitle);
       margin: 0.1rem 0;
     }
+    .inline-small-btn {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
   </style>
 </head>
 <body class="dark-mode">
@@ -186,7 +191,7 @@
       <h1>Credit Utilization Helper</h1>
       <p class="subtitle">
         Enter your card details below to see utilization and how much to pay to reach a target % on each card.
-        Nothing is saved; data clears when you refresh or close the page.
+        By default, nothing is saved when you leave or refresh this page.
       </p>
     </div>
     <button class="mode-toggle" id="modeToggle" type="button">
@@ -227,6 +232,16 @@
           <input type="checkbox" id="useRemainder" checked />
           After hitting targets, put leftover toward the highest-utilization card
         </label>
+      </div>
+
+      <div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="saveEnabled" />
+          Save my data on this device (local storage only)
+        </label>
+        <button id="clearSavedBtn" class="inline-small-btn secondary" type="button">
+          Clear saved data
+        </button>
       </div>
     </div>
 
@@ -278,9 +293,9 @@
       This tool is designed to be simple and privacy-friendly:
     </p>
     <ul>
-      <li>Everything runs in your browser. Nothing you type is sent to any server or stored online.</li>
-      <li>When you refresh or close this page, all information is cleared.</li>
-      <li>No cookies, tracking scripts, or analytics are used by this page itself.</li>
+      <li>Everything runs in your browser. By default, nothing you type is stored when you leave or refresh.</li>
+      <li>If you turn on <strong>"Save my data on this device"</strong>, your card names, limits, balances, and settings are stored locally in this browser using local storage.</li>
+      <li>Nothing is sent to any external server by this page, and there is no login or account.</li>
     </ul>
     <p>
       For your safety:
@@ -291,11 +306,13 @@
       <li>Only card limits and balances are needed to calculate utilization.</li>
     </ul>
     <p>
-      If you are using this on a shared or public device, close the tab when you are done.
+      If you are using this on a shared or public device, avoid enabling saving or clear saved data when you are done.
     </p>
   </div>
 
   <script>
+    const STORAGE_KEY = 'creditUtilHelperState';
+
     const cardsBody = document.getElementById('cardsBody');
     const addRowBtn = document.getElementById('addRowBtn');
     const calculateBtn = document.getElementById('calculateBtn');
@@ -306,6 +323,8 @@
     const availableInput = document.getElementById('availablePayment');
     const allocationAdvice = document.getElementById('allocationAdvice');
     const remainderCheckbox = document.getElementById('useRemainder');
+    const saveEnabledCheckbox = document.getElementById('saveEnabled');
+    const clearSavedBtn = document.getElementById('clearSavedBtn');
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
@@ -321,24 +340,154 @@
       cardsBody.appendChild(tr);
     }
 
-    // Start with 3 empty rows
+    // Initial blank rows (will be overridden if we load saved state)
     for (let i = 0; i < 3; i++) {
       addEmptyRow();
     }
 
+    function getAllocationMode() {
+      const modeInput = document.querySelector('input[name="allocationMode"]:checked');
+      return modeInput ? modeInput.value : 'score';
+    }
+
+    function getTargetPercent() {
+      let targetPercentValue = parseFloat(targetInput.value);
+      if (isNaN(targetPercentValue)) targetPercentValue = 30;
+      targetPercentValue = Math.max(1, Math.min(100, targetPercentValue));
+      targetInput.value = targetPercentValue; // normalize in UI
+      return targetPercentValue;
+    }
+
+    function collectState() {
+      const rows = Array.from(cardsBody.querySelectorAll('tr'));
+      const cards = rows.map(row => {
+        const name = row.querySelector('.name').value || '';
+        const limit = parseFloat(row.querySelector('.limit').value) || 0;
+        const balance = parseFloat(row.querySelector('.balance').value) || 0;
+        return { name, limit, balance };
+      }).filter(card =>
+        card.name.trim() !== '' || card.limit > 0 || card.balance > 0
+      );
+
+      const targetPercent = getTargetPercent();
+      const availablePayment = parseFloat(availableInput.value) || 0;
+      const allocationMode = getAllocationMode();
+      const useRemainder = remainderCheckbox && remainderCheckbox.checked;
+      const darkMode = document.body.classList.contains('dark-mode');
+      const saveEnabled = saveEnabledCheckbox && saveEnabledCheckbox.checked;
+
+      return {
+        cards,
+        targetPercent,
+        availablePayment,
+        allocationMode,
+        useRemainder,
+        darkMode,
+        saveEnabled
+      };
+    }
+
+    function saveState() {
+      if (!saveEnabledCheckbox || !saveEnabledCheckbox.checked) return;
+      try {
+        const state = collectState();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Could not save state:', e);
+      }
+    }
+
+    function loadState() {
+      let raw;
+      try {
+        raw = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {
+        return;
+      }
+      if (!raw) return;
+
+      let state;
+      try {
+        state = JSON.parse(raw);
+      } catch (e) {
+        return;
+      }
+
+      if (!state || typeof state !== 'object') return;
+
+      // Save enabled
+      if (typeof state.saveEnabled === 'boolean' && saveEnabledCheckbox) {
+        saveEnabledCheckbox.checked = state.saveEnabled;
+      }
+
+      // Target percent
+      if (typeof state.targetPercent === 'number') {
+        targetInput.value = state.targetPercent;
+      }
+
+      // Available payment
+      if (typeof state.availablePayment === 'number' && !isNaN(state.availablePayment)) {
+        availableInput.value = state.availablePayment;
+      }
+
+      // Allocation mode
+      if (state.allocationMode === 'quick' || state.allocationMode === 'score') {
+        const radio = document.querySelector(
+          `input[name="allocationMode"][value="${state.allocationMode}"]`
+        );
+        if (radio) {
+          radio.checked = true;
+        }
+      }
+
+      // Remainder checkbox
+      if (typeof state.useRemainder === 'boolean' && remainderCheckbox) {
+        remainderCheckbox.checked = state.useRemainder;
+      }
+
+      // Dark mode
+      if (typeof state.darkMode === 'boolean') {
+        if (state.darkMode) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+        const isDark = document.body.classList.contains('dark-mode');
+        modeToggle.querySelector('span').textContent = isDark ? 'Light mode' : 'Dark mode';
+      }
+
+      // Cards
+      if (Array.isArray(state.cards) && state.cards.length > 0) {
+        cardsBody.innerHTML = '';
+        state.cards.forEach(card => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><input type="text" class="name" /></td>
+            <td><input type="number" step="0.01" class="limit" /></td>
+            <td><input type="number" step="0.01" class="balance" /></td>
+            <td class="utilCell">—</td>
+            <td class="payCell">—</td>
+          `;
+          cardsBody.appendChild(tr);
+          tr.querySelector('.name').value = card.name || '';
+          tr.querySelector('.limit').value =
+            typeof card.limit === 'number' && !isNaN(card.limit) ? card.limit : '';
+          tr.querySelector('.balance').value =
+            typeof card.balance === 'number' && !isNaN(card.balance) ? card.balance : '';
+        });
+      }
+    }
+
     addRowBtn.addEventListener('click', () => {
       addEmptyRow();
+      saveState();
     });
 
     calculateBtn.addEventListener('click', () => {
       let totalLimit = 0;
       let totalBalance = 0;
 
-      // Clamp and read target %
-      let targetPercentValue = parseFloat(targetInput.value);
-      if (isNaN(targetPercentValue)) targetPercentValue = 30;
-      targetPercentValue = Math.max(1, Math.min(100, targetPercentValue));
-      targetInput.value = targetPercentValue; // normalize in UI
+      const targetPercentValue = getTargetPercent();
       const targetRatio = targetPercentValue / 100;
 
       const rows = cardsBody.querySelectorAll('tr');
@@ -386,6 +535,7 @@
       allocationAdvice.textContent = '';
       const available = parseFloat(availableInput.value) || 0;
       if (available <= 0 || totalLimit <= 0) {
+        saveState();
         return;
       }
 
@@ -416,12 +566,11 @@
 
       if (suggestions.length === 0) {
         allocationAdvice.textContent = '';
+        saveState();
         return;
       }
 
-      // Determine allocation mode
-      const modeInput = document.querySelector('input[name="allocationMode"]:checked');
-      const mode = modeInput ? modeInput.value : 'score';
+      const mode = getAllocationMode();
       const useRemainder = remainderCheckbox && remainderCheckbox.checked;
 
       // Sort suggestions according to chosen strategy
@@ -472,6 +621,8 @@
         allocationAdvice.textContent =
           'No clear allocation needed based on the current balances and target.';
       }
+
+      saveState();
     });
 
     clearBtn.addEventListener('click', () => {
@@ -486,13 +637,73 @@
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
       availableInput.value = '';
+      saveState();
     });
 
     modeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
       modeToggle.querySelector('span').textContent = isDark ? 'Light mode' : 'Dark mode';
+      saveState();
     });
+
+    targetInput.addEventListener('input', () => {
+      // Just normalize & save when user changes it
+      getTargetPercent();
+      saveState();
+    });
+
+    availableInput.addEventListener('input', () => {
+      saveState();
+    });
+
+    remainderCheckbox.addEventListener('change', () => {
+      saveState();
+    });
+
+    document.querySelectorAll('input[name="allocationMode"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        saveState();
+      });
+    });
+
+    if (saveEnabledCheckbox) {
+      saveEnabledCheckbox.addEventListener('change', () => {
+        if (saveEnabledCheckbox.checked) {
+          // User opted in: save current state
+          saveState();
+        } else {
+          // User opted out: clear stored state
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (e) {}
+        }
+      });
+    }
+
+    if (clearSavedBtn) {
+      clearSavedBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+        saveEnabledCheckbox.checked = false;
+        // Also clear current UI data so it's obvious everything is wiped
+        const rows = cardsBody.querySelectorAll('tr');
+        rows.forEach(row => {
+          row.querySelector('.name').value = '';
+          row.querySelector('.limit').value = '';
+          row.querySelector('.balance').value = '';
+          row.querySelector('.utilCell').textContent = '—';
+          row.querySelector('.payCell').textContent = '—';
+        });
+        summaryText.textContent = '';
+        allocationAdvice.textContent = '';
+        availableInput.value = '';
+      });
+    }
+
+    // Try to load saved state on page load
+    loadState();
   </script>
 
 </body>
