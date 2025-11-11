@@ -158,6 +158,25 @@
       display: block;
       margin-top: 0.15rem;
     }
+    .privacy-card h2 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    .privacy-card p {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+      margin: 0.25rem 0;
+    }
+    .privacy-card ul {
+      padding-left: 1.1rem;
+      margin: 0.25rem 0;
+    }
+    .privacy-card li {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+      margin: 0.1rem 0;
+    }
   </style>
 </head>
 <body class="dark-mode">
@@ -247,8 +266,32 @@
     </div>
 
     <p class="footnote">
-      Tip: Many scoring models prefer individual and total utilization under about 30%.
-      This page only helps you see the math; nothing is stored or transmitted.
+      This page only helps you see the math; it is not financial advice.
+      Always follow your card issuer’s terms and talk to a professional if you need personalized guidance.
+    </p>
+  </div>
+
+  <!-- Privacy & Safety section -->
+  <div class="card privacy-card">
+    <h2>Privacy &amp; Safety</h2>
+    <p>
+      This tool is designed to be simple and privacy-friendly:
+    </p>
+    <ul>
+      <li>Everything runs in your browser. Nothing you type is sent to any server or stored online.</li>
+      <li>When you refresh or close this page, all information is cleared.</li>
+      <li>No cookies, tracking scripts, or analytics are used by this page itself.</li>
+    </ul>
+    <p>
+      For your safety:
+    </p>
+    <ul>
+      <li>Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, Social Security numbers, or other sensitive personal data.</li>
+      <li>Card names can be generic (for example, “Card 1”, “Blue card”, “Store card”).</li>
+      <li>Only card limits and balances are needed to calculate utilization.</li>
+    </ul>
+    <p>
+      If you are using this on a shared or public device, close the tab when you are done.
     </p>
   </div>
 
@@ -411,13 +454,13 @@
         remaining -= pay;
       });
 
-      // Second pass: if there's leftover and user wants to use it,
-      // put it toward the highest-utilization card (even if already at/below target now)
+      // Second pass: leftover toward highest-utilization card if enabled
       if (remaining > 0 && useRemainder) {
-        // Highest-utilization card from the original suggestions
         const highestUtilCard = suggestions.slice().sort((a, b) => b.util - a.util)[0];
         if (highestUtilCard && remaining > 0) {
-          steps.push(`Then put the remaining $${remaining.toFixed(2)} toward ${highestUtilCard.name} to reduce overall debt.`);
+          steps.push(
+            `Then put the remaining $${remaining.toFixed(2)} toward ${highestUtilCard.name} to reduce overall debt.`
+          );
           remaining = 0;
         }
       }
