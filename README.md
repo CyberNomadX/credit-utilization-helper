@@ -1,72 +1,83 @@
-# credit-utilization-helper
+# Credit Utilization Helper
 
-A simple browser-based tool to calculate credit card utilization and plan how to apply extra payments.
+A lightweight, privacy-friendly web app that helps you calculate your credit card utilization and estimate how much to pay to reach a healthier percentage.
 
-👉 Try it live: https://cybernomadx.github.io/credit-utilization-helper/
-
----
-
-## What it does
-
-- Shows **per-card** and **overall** utilization
-- Calculates how much to pay on each card to reach a **target utilization %** (default 30%)
-- Suggests how to allocate a lump-sum payment across cards, with two modes:
-  - **Focus on score** – pay highest-utilization cards first
-  - **Quick wins** – pay the smallest amounts needed to bring cards down to target first
-- Optional: use leftover money to pay down the **highest-utilization** card after targets are hit
-- Dark mode UI
+👉 **Live demo:** [cybernomadx.github.io/credit-utilization-helper](https://cybernomadx.github.io/credit-utilization-helper)
 
 ---
 
-## Privacy & data
+## 💡 What It Does
 
-This tool is intentionally simple and privacy-friendly:
-
-- It runs entirely in your browser. There is **no backend, no login, and no account system**.
-- **By default, nothing is saved**. If you close or refresh the page, your entries are gone.
-- If you turn on **“Save my data on this device”**, the app uses your browser’s `localStorage` to remember:
-  - Card names (can be generic)
-  - Limits and balances
-  - Target utilization %
-  - Allocation strategy settings
-  - “Use remainder” preference
-  - Optional “available payment” amount
-- This data:
-  - Stays on **your device**, in **this browser** only
-  - Is **never uploaded** to any server by this tool
-
-For safety:
-
-- Don’t enter full card numbers, CVV/CVC, bank logins, Social Security numbers, or similar sensitive info.
-- Card names can be something like “Card 1”, “Blue Visa”, or “Store card” — whatever you recognize.
-
-If you’re using a shared or public device, keep saving turned off, or use the **“Clear saved data”** button before you leave.
+- Calculates per-card and total utilization.
+- Estimates “Pay to Target” amounts for each card.
+- Provides visual feedback with color coding, gauge, and trend chart.
+- Optionally stores your data **locally** (no accounts, no uploads).
 
 ---
 
-## How to use
+## 🧭 How to Use
 
-1. For each card, enter:
-   - A card name (can be generic)
-   - Credit limit
-   - Current balance
-2. Set your **target utilization %** (default 30%).
-3. (Optional) Enter how much you can pay in total right now.
-4. Choose an **allocation strategy**:
-   - *Focus on score* or *Quick wins*
-5. Click **Calculate**:
-   - See per-card and total utilization
-   - See “Pay to target” amounts per card
-   - If you entered a lump-sum amount, see a suggested payment order (which cards to pay and roughly how much)
+1. Enter your credit cards — just names, limits, and balances.  
+2. Click **Calculate** to see your utilization and payment suggestions.  
+3. Optionally enter how much you can pay now to see payoff guidance.
+
+> ⚠️ **Tip:** Enter plain numbers only (no dollar signs or commas).  
+> Example: type `1000`, not `1,000`.
 
 ---
 
-## Tech details
+## 🕵️ Privacy & Data Storage
 
-- Static single-page app: plain **HTML, CSS, and JavaScript**
-- Hosted on **GitHub Pages**
-- Uses `localStorage` only when the user enables the “Save my data on this device” option
+This app is designed to protect your privacy:
+
+- Everything runs entirely in your browser.  
+- By default, no data is saved anywhere.  
+- If you enable **“Save my data on this device”**, information is stored only in your browser’s `localStorage`.  
+- Nothing is uploaded, tracked, or shared.
+
+> 💬 Avoid entering sensitive info like full card numbers, bank logins, or SSNs.  
+> Generic names like “Card 1” or “Blue Card” are fine.
 
 ---
 
-Made by CyberNomadx.
+## ⚙️ Features
+
+| Feature | Description |
+|----------|-------------|
+| 🧮 Per-card and total utilization | Calculates usage and target pay-down |
+| 🎯 Payment suggestions | Suggests where to allocate available funds |
+| 🔵 Utilization gauge | Circular progress showing overall usage |
+| 📈 Trend chart | Tracks your last few calculations |
+| 🌙 Dark mode | Clean and automatic light/dark theme |
+| 💾 Local storage toggle | Save data safely on your own device |
+| 🔐 Privacy first | Zero network requests, zero tracking |
+
+---
+
+## 🛠️ Tech Overview
+
+- **Frontend only:** Vanilla HTML, CSS, and JavaScript.  
+- **Hosting:** GitHub Pages.  
+- **Storage:** Browser `localStorage` (optional).  
+- **Compatibility:** Modern desktop and mobile browsers.
+
+---
+
+## ☕ Support My Work
+
+If you find this tool helpful, consider [**buying me a coffee**](https://buymeacoffee.com/cybernomadx).  
+Your support helps keep small, privacy-focused tools like this free and improving.
+
+---
+
+## 🧾 Disclaimer
+
+This project provides simple math-based estimates only.  
+It is **not financial advice**. Always verify results with your financial institution or credit bureau.
+
+---
+
+## 🧩 License
+
+MIT License — free to use, modify, and share with credit.  
+See the [LICENSE](LICENSE) file for details.
