@@ -290,22 +290,42 @@
     </p>
   </div>
 
-  <div class="card privacy-card">
-    <h2>Privacy &amp; Safety</h2>
-    <p>This tool is designed to be simple and privacy-friendly:</p>
-    <ul>
-      <li>Everything runs in your browser. By default, nothing is stored when you leave or refresh.</li>
-      <li>If you enable <strong>"Save my data on this device"</strong>, data stays only in this browser using local storage.</li>
-      <li>No data is uploaded, tracked, or shared with any external server.</li>
-    </ul>
-    <p>For your safety:</p>
-    <ul>
-      <li>Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, or SSNs.</li>
-      <li>Card names can be generic (e.g., “Card 1”, “Blue card”).</li>
-      <li>Only card limits and balances are needed to calculate utilization.</li>
-    </ul>
-    <p>If you’re on a shared or public device, avoid saving or clear data when finished.</p>
-  </div>
+<div class="card privacy-card">
+  <h2>Privacy &amp; Safety</h2>
+  <p>This tool is designed to be simple and privacy-friendly:</p>
+  <ul>
+    <li>
+      Everything runs in your browser. By default, nothing is stored when you leave or refresh the page.
+    </li>
+    <li>
+      If you turn on <strong>"Save my data on this device"</strong>, your card names, limits, balances, and tool settings
+      (target %, allocation strategy, remainder behavior, and available payment amount) are saved locally in this browser
+      using <code>localStorage</code>.
+    </li>
+    <li>
+      No data is uploaded, tracked, or shared with any external server, and there is no login or account system.
+    </li>
+  </ul>
+
+  <p>For your safety:</p>
+  <ul>
+    <li>
+      Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, Social Security numbers, or other highly sensitive data.
+    </li>
+    <li>
+      Card names can be generic (for example, “Card 1”, “Blue card”, “Store card”).
+    </li>
+    <li>
+      Only card limits and balances are needed to calculate utilization and payment suggestions.
+    </li>
+  </ul>
+
+  <p>
+    If you’re on a shared or public device, avoid turning on saving or use the “Clear saved data” button (or your browser’s
+    site data settings) when you’re done.
+  </p>
+</div>
+
 
   <footer>
     © 2025 Credit Utilization Helper — built for education and personal finance awareness.<br />
