@@ -19,11 +19,10 @@
       --secondary-btn-text: #111827;
       --table-header-bg: #f3f4f6;
 
-     /* Utilization row backgrounds (light mode, soft professional palette) */
---util-good-bg: rgba(56, 189, 248, 0.15);   /* soft blue */
---util-ok-bg:   rgba(251, 191, 36, 0.12);   /* warm gold */
---util-high-bg: rgba(239, 68, 68, 0.15);    /* light red */
-
+      /* Utilization row backgrounds (light mode, soft professional palette) */
+      --util-good-bg: rgba(56, 189, 248, 0.15);   /* soft blue */
+      --util-ok-bg:   rgba(251, 191, 36, 0.12);   /* warm gold */
+      --util-high-bg: rgba(239, 68, 68, 0.15);    /* light red */
     }
 
     body.dark-mode {
@@ -41,10 +40,9 @@
       --table-header-bg: #020617;
 
       /* Utilization row backgrounds (dark mode, soft professional palette) */
---util-good-bg: rgba(56, 189, 248, 0.25);   /* blue tint */
---util-ok-bg:   rgba(251, 191, 36, 0.25);   /* gold tint */
---util-high-bg: rgba(239, 68, 68, 0.25);    /* red tint */
-
+      --util-good-bg: rgba(56, 189, 248, 0.25);   /* blue tint */
+      --util-ok-bg:   rgba(251, 191, 36, 0.25);   /* gold tint */
+      --util-high-bg: rgba(239, 68, 68, 0.25);    /* red tint */
     }
 
     body {
@@ -195,17 +193,75 @@
       line-height: 1.4;
     }
 
-    /* NEW: utilization row color classes */
+    /* Utilization row shading */
     tr.util-good {
       background: var(--util-good-bg);
     }
-
     tr.util-ok {
       background: var(--util-ok-bg);
     }
-
     tr.util-high {
       background: var(--util-high-bg);
+    }
+    tr.util-good td,
+    tr.util-ok td,
+    tr.util-high td {
+      transition: background 0.2s ease;
+    }
+
+    /* Gauge styles */
+    .gauge-wrapper {
+      margin-top: 0.75rem;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .gauge-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .gauge-label {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+    }
+
+    .gauge-svg {
+      width: 120px;
+      height: 120px;
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 8;
+    }
+
+    .gauge-value {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 0.4s ease, stroke 0.2s ease;
+    }
+
+    .gauge-text {
+      fill: var(--text);
+      font-size: 1.1rem;
+      font-weight: 500;
+      dominant-baseline: middle;
+    }
+
+    .gauge-caption {
+      font-size: 0.8rem;
+      color: var(--subtitle);
+      text-align: center;
+      max-width: 200px;
     }
   </style>
 </head>
@@ -297,6 +353,21 @@
 
     <p class="summary" id="summaryText"></p>
 
+    <!-- Overall utilization gauge -->
+    <div class="gauge-wrapper">
+      <div class="gauge-card">
+        <div class="gauge-label">Overall utilization</div>
+        <svg viewBox="0 0 120 120" class="gauge-svg">
+          <circle cx="60" cy="60" r="50" class="gauge-bg"></circle>
+          <circle cx="60" cy="60" r="50" class="gauge-value" id="gaugeValue"></circle>
+          <text x="60" y="64" text-anchor="middle" class="gauge-text" id="gaugeText">--%</text>
+        </svg>
+        <div class="gauge-caption" id="gaugeCaption">
+          Enter card info and click Calculate to see your utilization.
+        </div>
+      </div>
+    </div>
+
     <div style="margin-top: 0.75rem;">
       <label for="availablePayment">Optional: how much can you pay in total right now? ($)</label>
       <input
@@ -372,6 +443,39 @@
     const remainderCheckbox = document.getElementById('useRemainder');
     const saveEnabledCheckbox = document.getElementById('saveEnabled');
     const clearSavedBtn = document.getElementById('clearSavedBtn');
+
+    const gaugeValueCircle = document.getElementById('gaugeValue');
+    const gaugeText = document.getElementById('gaugeText');
+    const gaugeCaption = document.getElementById('gaugeCaption');
+    const GAUGE_CIRC = 314; // approx circumference for r=50
+
+    function resetGauge() {
+      if (!gaugeValueCircle) return;
+      gaugeValueCircle.style.strokeDashoffset = GAUGE_CIRC;
+      gaugeValueCircle.style.stroke = '#38bdf8';
+      gaugeText.textContent = '--%';
+      gaugeCaption.textContent = 'Enter card info and click Calculate to see your utilization.';
+    }
+
+    function updateGauge(util) {
+      if (!gaugeValueCircle) return;
+      const clamped = Math.max(0, Math.min(util, 100));
+      const offset = GAUGE_CIRC - (clamped / 100) * GAUGE_CIRC;
+      gaugeValueCircle.style.strokeDashoffset = offset;
+      gaugeText.textContent = util.toFixed(1) + '%';
+
+      // Color and caption by range
+      if (util < 30) {
+        gaugeValueCircle.style.stroke = '#38bdf8'; // blue
+        gaugeCaption.textContent = 'Under ~30% is generally considered a healthy utilization range.';
+      } else if (util < 70) {
+        gaugeValueCircle.style.stroke = '#fbbf24'; // amber
+        gaugeCaption.textContent = 'You\'re in a middle range. Paying down toward 30% can help over time.';
+      } else {
+        gaugeValueCircle.style.stroke = '#ef4444'; // red
+        gaugeCaption.textContent = 'High utilization. Paying this down can reduce risk and may help your score.';
+      }
+    }
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
@@ -490,7 +594,7 @@
         const utilCell = row.querySelector('.utilCell');
         const payCell = row.querySelector('.payCell');
 
-        // reset row color classes first
+        // reset row colors
         row.classList.remove('util-good', 'util-ok', 'util-high');
 
         const limit = parseFloat(limitInput.value) || 0;
@@ -509,7 +613,6 @@
             ? '$' + paymentNeeded.toFixed(2)
             : 'At/Below';
 
-          // add row color based on utilization
           if (util < 30) {
             row.classList.add('util-good');
           } else if (util < 70) {
@@ -529,8 +632,10 @@
           'Total limit: $' + totalLimit.toFixed(2) +
           ' | Total balance: $' + totalBalance.toFixed(2) +
           ' | Overall utilization: ' + overallUtil.toFixed(1) + '%';
+        updateGauge(overallUtil);
       } else {
         summaryText.textContent = '';
+        resetGauge();
       }
 
       allocationAdvice.textContent = '';
@@ -617,6 +722,7 @@
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
       availableInput.value = '';
+      resetGauge();
       saveState();
     });
 
@@ -649,6 +755,7 @@
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
       availableInput.value = '';
+      resetGauge();
     });
 
     // Save on inputs changing
@@ -668,6 +775,8 @@
 
     // Load saved state if present
     loadState();
+    // Initialize gauge on first load
+    resetGauge();
   </script>
 </body>
 </html>
