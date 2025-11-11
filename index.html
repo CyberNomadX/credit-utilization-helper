@@ -361,6 +361,10 @@
       </div>
     </div>
 
+    <p style="font-size:0.8rem;color:var(--subtitle);margin-top:0.25rem;">
+      💡 Tip: Enter numbers only (no dollar signs). Commas are okay — the app will ignore them.
+    </p>
+
     <table id="cardsTable">
       <thead>
         <tr>
@@ -491,6 +495,12 @@
     const HISTORY_LIMIT = 30;
     let utilizationHistory = [];
 
+    // helper: clean numeric input (remove commas and spaces, then parse)
+    function cleanNumberInput(value) {
+      if (value == null) return NaN;
+      return parseFloat(String(value).replace(/,/g, '').trim());
+    }
+
     function resetGauge() {
       if (!gaugeValueCircle) return;
       gaugeValueCircle.style.strokeDashoffset = GAUGE_CIRC;
@@ -583,7 +593,7 @@
     }
 
     function getTargetPercent() {
-      let val = parseFloat(targetInput.value);
+      let val = cleanNumberInput(targetInput.value);
       if (isNaN(val)) val = 30;
       val = Math.max(1, Math.min(100, val));
       targetInput.value = val;
@@ -595,8 +605,8 @@
       const cards = rows
         .map(row => {
           const name = row.querySelector('.name').value || '';
-          const limit = parseFloat(row.querySelector('.limit').value) || 0;
-          const balance = parseFloat(row.querySelector('.balance').value) || 0;
+          const limit = cleanNumberInput(row.querySelector('.limit').value) || 0;
+          const balance = cleanNumberInput(row.querySelector('.balance').value) || 0;
           return { name, limit, balance };
         })
         .filter(card => card.name.trim() !== '' || card.limit > 0 || card.balance > 0);
@@ -604,7 +614,7 @@
       return {
         cards,
         targetPercent: getTargetPercent(),
-        availablePayment: parseFloat(availableInput.value) || 0,
+        availablePayment: cleanNumberInput(availableInput.value) || 0,
         allocationMode: getAllocationMode(),
         useRemainder: remainderCheckbox.checked,
         history: utilizationHistory
@@ -691,8 +701,8 @@
 
         row.classList.remove('util-good', 'util-ok', 'util-high');
 
-        const limit = parseFloat(limitInput.value) || 0;
-        const balance = parseFloat(balanceInput.value) || 0;
+        const limit = cleanNumberInput(limitInput.value) || 0;
+        const balance = cleanNumberInput(balanceInput.value) || 0;
 
         if (limit > 0 || balance > 0) {
           totalLimit += limit;
@@ -734,7 +744,7 @@
       }
 
       allocationAdvice.textContent = '';
-      const available = parseFloat(availableInput.value) || 0;
+      const available = cleanNumberInput(availableInput.value) || 0;
       if (available <= 0 || totalLimit <= 0) {
         saveState();
         return;
@@ -743,8 +753,8 @@
       const suggestions = [];
       rows.forEach(row => {
         const name = row.querySelector('.name').value || 'Unnamed card';
-        const limit = parseFloat(row.querySelector('.limit').value) || 0;
-        const balance = parseFloat(row.querySelector('.balance').value) || 0;
+        const limit = cleanNumberInput(row.querySelector('.limit').value) || 0;
+        const balance = cleanNumberInput(row.querySelector('.balance').value) || 0;
         if (limit > 0 && balance > 0) {
           const util = (balance / limit) * 100;
           const targetBalance = limit * targetRatio;
