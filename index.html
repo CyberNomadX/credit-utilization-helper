@@ -214,6 +214,8 @@
       margin-top: 0.75rem;
       display: flex;
       justify-content: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
     }
 
     .gauge-card {
@@ -262,6 +264,33 @@
       color: var(--subtitle);
       text-align: center;
       max-width: 200px;
+    }
+
+    /* Trend styles */
+    .trend-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .trend-label {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+    }
+
+    .trend-svg {
+      width: 100%;
+      height: 60px;
+      color: var(--primary-btn-bg);
+      background: transparent;
+    }
+
+    .trend-caption {
+      font-size: 0.8rem;
+      color: var(--subtitle);
+      max-width: 260px;
     }
   </style>
 </head>
@@ -353,7 +382,7 @@
 
     <p class="summary" id="summaryText"></p>
 
-    <!-- Overall utilization gauge -->
+    <!-- Gauge + Trend -->
     <div class="gauge-wrapper">
       <div class="gauge-card">
         <div class="gauge-label">Overall utilization</div>
@@ -364,6 +393,14 @@
         </svg>
         <div class="gauge-caption" id="gaugeCaption">
           Enter card info and click Calculate to see your utilization.
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-label">Recent utilization trend</div>
+        <svg id="trendSvg" class="trend-svg" viewBox="0 0 100 40" preserveAspectRatio="none"></svg>
+        <div class="trend-caption" id="trendCaption">
+          The chart updates each time you click Calculate. Newest point is on the right.
         </div>
       </div>
     </div>
@@ -449,6 +486,11 @@
     const gaugeCaption = document.getElementById('gaugeCaption');
     const GAUGE_CIRC = 314; // approx circumference for r=50
 
+    const trendSvg = document.getElementById('trendSvg');
+    const trendCaption = document.getElementById('trendCaption');
+    const HISTORY_LIMIT = 30;
+    let utilizationHistory = [];
+
     function resetGauge() {
       if (!gaugeValueCircle) return;
       gaugeValueCircle.style.strokeDashoffset = GAUGE_CIRC;
@@ -464,7 +506,6 @@
       gaugeValueCircle.style.strokeDashoffset = offset;
       gaugeText.textContent = util.toFixed(1) + '%';
 
-      // Color and caption by range
       if (util < 30) {
         gaugeValueCircle.style.stroke = '#38bdf8'; // blue
         gaugeCaption.textContent = 'Under ~30% is generally considered a healthy utilization range.';
@@ -475,6 +516,51 @@
         gaugeValueCircle.style.stroke = '#ef4444'; // red
         gaugeCaption.textContent = 'High utilization. Paying this down can reduce risk and may help your score.';
       }
+    }
+
+    function updateTrendChart() {
+      if (!trendSvg) return;
+
+      trendSvg.innerHTML = '';
+
+      if (!utilizationHistory || utilizationHistory.length === 0) {
+        trendCaption.textContent = 'The chart updates each time you click Calculate. Newest point is on the right.';
+        return;
+      }
+
+      const data = utilizationHistory.slice(-HISTORY_LIMIT);
+      if (data.length === 1) {
+        trendCaption.textContent = 'Showing your last calculation.';
+      } else {
+        trendCaption.textContent = 'Showing your last ' + data.length + ' calculations. Newest point is on the right.';
+      }
+
+      const values = data.map(d => d.util);
+      const maxVal = Math.max(30, ...values); // avoid super flat lines
+      const minVal = 0;
+
+      const points = values.map((v, i) => {
+        const x = data.length === 1 ? 50 : (i / (data.length - 1)) * 100;
+        const norm = (v - minVal) / (maxVal - minVal || 1);
+        const y = 38 - norm * 30; // padding top/bottom
+        return x.toFixed(2) + ',' + y.toFixed(2);
+      }).join(' ');
+
+      const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polyline.setAttribute('points', points);
+      polyline.setAttribute('fill', 'none');
+      polyline.setAttribute('stroke', 'currentColor');
+      polyline.setAttribute('stroke-width', '1.5');
+
+      trendSvg.appendChild(polyline);
+    }
+
+    function recordHistory(util) {
+      utilizationHistory.push({ util: util, ts: Date.now() });
+      if (utilizationHistory.length > HISTORY_LIMIT) {
+        utilizationHistory = utilizationHistory.slice(-HISTORY_LIMIT);
+      }
+      updateTrendChart();
     }
 
     function addEmptyRow() {
@@ -520,7 +606,8 @@
         targetPercent: getTargetPercent(),
         availablePayment: parseFloat(availableInput.value) || 0,
         allocationMode: getAllocationMode(),
-        useRemainder: remainderCheckbox.checked
+        useRemainder: remainderCheckbox.checked,
+        history: utilizationHistory
       };
     }
 
@@ -578,6 +665,14 @@
             typeof card.balance === 'number' && !isNaN(card.balance) ? card.balance : '';
         });
       }
+
+      if (Array.isArray(state.history)) {
+        utilizationHistory = state.history.map(h => ({
+          util: typeof h.util === 'number' ? h.util : 0,
+          ts: h.ts || Date.now()
+        }));
+      }
+      updateTrendChart();
     }
 
     function recalcAndSuggest() {
@@ -594,7 +689,6 @@
         const utilCell = row.querySelector('.utilCell');
         const payCell = row.querySelector('.payCell');
 
-        // reset row colors
         row.classList.remove('util-good', 'util-ok', 'util-high');
 
         const limit = parseFloat(limitInput.value) || 0;
@@ -633,6 +727,7 @@
           ' | Total balance: $' + totalBalance.toFixed(2) +
           ' | Overall utilization: ' + overallUtil.toFixed(1) + '%';
         updateGauge(overallUtil);
+        recordHistory(overallUtil);
       } else {
         summaryText.textContent = '';
         resetGauge();
@@ -640,7 +735,10 @@
 
       allocationAdvice.textContent = '';
       const available = parseFloat(availableInput.value) || 0;
-      if (available <= 0 || totalLimit <= 0) return;
+      if (available <= 0 || totalLimit <= 0) {
+        saveState();
+        return;
+      }
 
       const suggestions = [];
       rows.forEach(row => {
@@ -654,7 +752,10 @@
           suggestions.push({ name, util, payToTarget, limit, balance });
         }
       });
-      if (!suggestions.length) return;
+      if (!suggestions.length) {
+        saveState();
+        return;
+      }
 
       const mode = getAllocationMode();
       const useRemainder = remainderCheckbox.checked;
@@ -697,6 +798,8 @@
       allocationAdvice.textContent = steps.length
         ? 'With $' + available.toFixed(2) + ', you could: ' + steps.join(' → ')
         : 'No clear allocation needed based on the current balances and target.';
+
+      saveState();
     }
 
     addRowBtn.addEventListener('click', () => {
@@ -706,7 +809,6 @@
 
     calculateBtn.addEventListener('click', () => {
       recalcAndSuggest();
-      saveState();
     });
 
     clearBtn.addEventListener('click', () => {
@@ -722,7 +824,9 @@
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
       availableInput.value = '';
+      utilizationHistory = [];
       resetGauge();
+      updateTrendChart();
       saveState();
     });
 
@@ -755,7 +859,9 @@
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
       availableInput.value = '';
+      utilizationHistory = [];
       resetGauge();
+      updateTrendChart();
     });
 
     // Save on inputs changing
@@ -775,8 +881,8 @@
 
     // Load saved state if present
     loadState();
-    // Initialize gauge on first load
     resetGauge();
+    updateTrendChart();
   </script>
 </body>
 </html>
