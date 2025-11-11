@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Credit Utilization Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      margin-bottom: 0.25rem;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 0.4rem;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.25rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .primary {
+      background: #2563eb;
+      color: white;
+      margin-top: 0.5rem;
+    }
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+      margin-left: 0.5rem;
+    }
+    .summary {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: #333;
+    }
+    .footnote {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Credit Utilization Helper</h1>
+  <p class="subtitle">
+    Enter your cards below to see utilization and how much to pay to reach 30% on each card.
+    Nothing is saved; numbers are cleared if you refresh or close the page.
+  </p>
+
+  <div class="card">
+    <table id="cardsTable">
+      <thead>
+        <tr>
+          <th>Card Name</th>
+          <th>Limit ($)</th>
+          <th>Balance ($)</th>
+          <th>Utilization</th>
+          <th>Pay to Hit 30%</th>
+        </tr>
+      </thead>
+      <tbody id="cardsBody">
+        <!-- Rows will be added here -->
+      </tbody>
+    </table>
+    <button class="primary" id="addRowBtn">Add Card Row</button>
+    <button class="secondary" id="calculateBtn">Calculate</button>
+    <button class="secondary" id="clearBtn">Clear All</button>
+
+    <p class="summary" id="summaryText"></p>
+    <p class="footnote">
+      Tip: FICO usually prefers total utilization under ~30%, and individual cards under 30%.
+      This tool just helps you see the math more clearly.
+    </p>
+  </div>
+
+  <script>
+    const cardsBody = document.getElementById('cardsBody');
+    const addRowBtn = document.getElementById('addRowBtn');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const summaryText = document.getElementById('summaryText');
+
+    function addEmptyRow() {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td><input type="text" placeholder="Capital One Savor" class="name" /></td>
+        <td><input type="number" placeholder="2000" step="0.01" class="limit" /></td>
+        <td><input type="number" placeholder="1738.13" step="0.01" class="balance" /></td>
+        <td class="utilCell">—</td>
+        <td class="payCell">—</td>
+      `;
+
+      cardsBody.appendChild(tr);
+    }
+
+    // Start with 3 empty rows
+    for (let i = 0; i < 3; i++) {
+      addEmptyRow();
+    }
+
+    addRowBtn.addEventListener('click', () => {
+      addEmptyRow();
+    });
+
+    calculateBtn.addEventListener('click', () => {
+      let totalLimit = 0;
+      let totalBalance = 0;
+
+      const rows = cardsBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const limitInput = row.querySelector('.limit');
+        const balanceInput = row.querySelector('.balance');
+        const utilCell = row.querySelector('.utilCell');
+        const payCell = row.querySelector('.payCell');
+
+        const limit = parseFloat(limitInput.value) || 0;
+        const balance = parseFloat(balanceInput.value) || 0;
+
+        if (limit > 0 || balance > 0) {
+          totalLimit += limit;
+          totalBalance += balance;
+
+          const util = limit > 0 ? (balance / limit) * 100 : 0;
+          const targetBalance = limit * 0.30;
+          const paymentNeeded = Math.max(0, balance - targetBalance);
+
+          utilCell.textContent = `${util.toFixed(1)}%`;
+          if (paymentNeeded > 0) {
+            payCell.textContent = `$${paymentNeeded.toFixed(2)}`;
+          } else {
+            payCell.textContent = 'Already ≤ 30%';
+          }
+        } else {
+          utilCell.textContent = '—';
+          payCell.textContent = '—';
+        }
+      });
+
+      if (totalLimit > 0) {
+        const overallUtil = (totalBalance / totalLimit) * 100;
+        summaryText.textContent =
+          `Total limit: $${totalLimit.toFixed(2)} | ` +
+          `Total balance: $${totalBalance.toFixed(2)} | ` +
+          `Overall utilization: ${overallUtil.toFixed(1)}%`;
+      } else {
+        summaryText.textContent = '';
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      // Clear all inputs and outputs
+      const rows = cardsBody.querySelectorAll('tr');
+      rows.forEach(row => {
+        row.querySelector('.name').value = '';
+        row.querySelector('.limit').value = '';
+        row.querySelector('.balance').value = '';
+        row.querySelector('.utilCell').textContent = '—';
+        row.querySelector('.payCell').textContent = '—';
+      });
+      summaryText.textContent = '';
+    });
+  </script>
+
+</body>
+</html>
