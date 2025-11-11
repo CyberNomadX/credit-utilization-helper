@@ -18,6 +18,11 @@
       --secondary-btn-bg: #e5e7eb;
       --secondary-btn-text: #111827;
       --table-header-bg: #f3f4f6;
+
+      /* Utilization row backgrounds (light mode) */
+      --util-good-bg: #dcfce7;  /* light green */
+      --util-ok-bg:   #fef9c3;  /* light yellow */
+      --util-high-bg: #fee2e2;  /* light red */
     }
 
     body.dark-mode {
@@ -33,6 +38,11 @@
       --secondary-btn-bg: #111827;
       --secondary-btn-text: #e5e7eb;
       --table-header-bg: #020617;
+
+      /* Utilization row backgrounds (dark mode) */
+      --util-good-bg: rgba(22, 163, 74, 0.2);  /* green-ish */
+      --util-ok-bg:   rgba(202, 138, 4, 0.2);  /* amber-ish */
+      --util-high-bg: rgba(220, 38, 38, 0.2);  /* red-ish */
     }
 
     body {
@@ -182,6 +192,19 @@
       margin-top: 1.5rem;
       line-height: 1.4;
     }
+
+    /* NEW: utilization row color classes */
+    tr.util-good {
+      background: var(--util-good-bg);
+    }
+
+    tr.util-ok {
+      background: var(--util-ok-bg);
+    }
+
+    tr.util-high {
+      background: var(--util-high-bg);
+    }
   </style>
 </head>
 <body class="dark-mode">
@@ -198,7 +221,7 @@
       🌓 <span>Light mode</span>
     </button>
   </div>
-  
+
   <div class="card">
     <div class="controls">
       <div>
@@ -290,58 +313,31 @@
     </p>
   </div>
 
-<div class="card privacy-card">
-  <h2>Privacy &amp; Safety</h2>
-  <p>This tool is designed to be simple and privacy-friendly:</p>
-  <ul>
-    <li>
-      Everything runs in your browser. By default, nothing is stored when you leave or refresh the page.
-    </li>
-    <li>
-      If you turn on <strong>"Save my data on this device"</strong>, your card names, limits, balances, and tool settings
-      (target %, allocation strategy, remainder behavior, and available payment amount) are saved locally in this browser
-      using <code>localStorage</code>.
-    </li>
-    <li>
-      No data is uploaded, tracked, or shared with any external server, and there is no login or account system.
-    </li>
-  </ul>
-
-  <p>For your safety:</p>
-  <ul>
-    <li>
-      Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, Social Security numbers, or other highly sensitive data.
-    </li>
-    <li>
-      Card names can be generic (for example, “Card 1”, “Blue card”, “Store card”).
-    </li>
-    <li>
-      Only card limits and balances are needed to calculate utilization and payment suggestions.
-    </li>
-  </ul>
-
-  <p>
-    If you’re on a shared or public device, avoid turning on saving or use the “Clear saved data” button (or your browser’s
-    site data settings) when you’re done.
-  </p>
-</div>
-
-  <p>
-  Found a bug or have a suggestion?  
-  <a href="https://github.com/cybernomadx/credit-utilization-helper/issues" target="_blank" style="color: var(--primary-btn-bg); text-decoration: underline;">
-    Open an issue on GitHub
-  </a>.
-</p>
-
+  <div class="card privacy-card">
+    <h2>Privacy &amp; Safety</h2>
+    <p>This tool is designed to be simple and privacy-friendly:</p>
+    <ul>
+      <li>Everything runs in your browser. By default, nothing is stored when you leave or refresh.</li>
+      <li>If you enable <strong>"Save my data on this device"</strong>, data stays only in this browser using local storage.</li>
+      <li>No data is uploaded, tracked, or shared with any external server.</li>
+    </ul>
+    <p>For your safety:</p>
+    <ul>
+      <li>Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, or SSNs.</li>
+      <li>Card names can be generic (e.g., “Card 1”, “Blue card”).</li>
+      <li>Only card limits and balances are needed to calculate utilization.</li>
+    </ul>
+    <p>If you’re on a shared or public device, avoid saving or clear data when finished.</p>
+  </div>
 
   <footer>
     © 2025 Credit Utilization Helper — built for education and personal finance awareness.<br />
     This tool provides estimates only and does not offer financial, legal, or credit repair advice.<br />
     Always verify results with your financial institution or credit bureau.
+  </footer>
 
-    
-  <!-- Buy Me a Coffee floating button -->
-  <a href="https://buymeacoffee.com/cybernomadx"
+  <!-- Floating Buy Me a Coffee button -->
+  <a href="https://buymeacoffee.com/cybernomadx" 
      target="_blank" rel="noopener noreferrer"
      style="
        position: fixed;
@@ -358,8 +354,6 @@
      ">
     ☕ Support my work
   </a>
-    
-  </footer>
 
   <script>
     const STORAGE_KEY = 'creditUtilHelperState';
@@ -494,6 +488,9 @@
         const utilCell = row.querySelector('.utilCell');
         const payCell = row.querySelector('.payCell');
 
+        // reset row color classes first
+        row.classList.remove('util-good', 'util-ok', 'util-high');
+
         const limit = parseFloat(limitInput.value) || 0;
         const balance = parseFloat(balanceInput.value) || 0;
 
@@ -509,6 +506,15 @@
           payCell.textContent = paymentNeeded > 0
             ? '$' + paymentNeeded.toFixed(2)
             : 'At/Below';
+
+          // add row color based on utilization
+          if (util < 30) {
+            row.classList.add('util-good');
+          } else if (util < 70) {
+            row.classList.add('util-ok');
+          } else {
+            row.classList.add('util-high');
+          }
         } else {
           utilCell.textContent = '—';
           payCell.textContent = '—';
@@ -604,6 +610,7 @@
         row.querySelector('.balance').value = '';
         row.querySelector('.utilCell').textContent = '—';
         row.querySelector('.payCell').textContent = '—';
+        row.classList.remove('util-good', 'util-ok', 'util-high');
       });
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
@@ -635,6 +642,7 @@
         row.querySelector('.balance').value = '';
         row.querySelector('.utilCell').textContent = '—';
         row.querySelector('.payCell').textContent = '—';
+        row.classList.remove('util-good', 'util-ok', 'util-high');
       });
       summaryText.textContent = '';
       allocationAdvice.textContent = '';
