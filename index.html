@@ -45,15 +45,8 @@
       transition: background 0.2s ease, color 0.2s ease;
     }
 
-    h1 {
-      margin-bottom: 0.25rem;
-    }
-
-    .subtitle {
-      font-size: 0.9rem;
-      color: var(--subtitle);
-      margin-bottom: 1rem;
-    }
+    h1 { margin-bottom: 0.25rem; }
+    .subtitle { font-size: 0.9rem; color: var(--subtitle); margin-bottom: 1rem; }
 
     .top-bar {
       display: flex;
@@ -75,10 +68,7 @@
       white-space: nowrap;
     }
 
-    .mode-toggle span {
-      margin-left: 0.25rem;
-      font-size: 0.8rem;
-    }
+    .mode-toggle span { margin-left: 0.25rem; font-size: 0.8rem; }
 
     .card {
       background: var(--card-bg);
@@ -102,9 +92,7 @@
       text-align: left;
     }
 
-    th {
-      background: var(--table-header-bg);
-    }
+    th { background: var(--table-header-bg); }
 
     input[type="text"], input[type="number"] {
       width: 100%;
@@ -116,9 +104,7 @@
       color: var(--text);
     }
 
-    input::placeholder {
-      color: var(--subtitle);
-    }
+    input::placeholder { color: var(--subtitle); }
 
     button {
       padding: 0.5rem 1rem;
@@ -141,34 +127,18 @@
       margin-top: 0.5rem;
     }
 
-    .summary {
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      color: var(--summary);
-    }
+    .summary { font-size: 0.9rem; margin-top: 0.5rem; color: var(--summary); }
+    .footnote { font-size: 0.8rem; color: var(--footnote); margin-top: 0.75rem; }
 
-    .footnote {
-      font-size: 0.8rem;
-      color: var(--footnote);
-      margin-top: 0.75rem;
-    }
-
-    .controls {
-      margin-bottom: 0.75rem;
-      display: grid;
-      gap: 0.5rem;
-    }
-
-    .controls label {
-      font-size: 0.85rem;
-      color: var(--subtitle);
-    }
+    .controls { margin-bottom: 0.75rem; display: grid; gap: 0.75rem; }
+    .controls label { font-size: 0.85rem; color: var(--subtitle); }
 
     .controls-block-title {
       font-size: 0.85rem;
       color: var(--subtitle);
       display: block;
       margin-bottom: 0.25rem;
+      font-weight: 600;
     }
 
     .radio-label,
@@ -179,28 +149,25 @@
       margin-top: 0.15rem;
     }
 
-    .privacy-card h2 {
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-      font-size: 1rem;
+    .controls-group {
+      padding-top: 0.25rem;
     }
 
-    .privacy-card p {
-      font-size: 0.85rem;
-      color: var(--subtitle);
-      margin: 0.25rem 0;
+    .controls-group.behavior {
+      border-top: 1px solid var(--border);
+      margin-top: 0.25rem;
     }
 
-    .privacy-card ul {
-      padding-left: 1.1rem;
-      margin: 0.25rem 0;
+    .controls-group.storage {
+      border-top: 1px solid var(--border);
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
     }
 
-    .privacy-card li {
-      font-size: 0.85rem;
-      color: var(--subtitle);
-      margin: 0.1rem 0;
-    }
+    .privacy-card h2 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1rem; }
+    .privacy-card p { font-size: 0.85rem; color: var(--subtitle); margin: 0.25rem 0; }
+    .privacy-card ul { padding-left: 1.1rem; margin: 0.25rem 0; }
+    .privacy-card li { font-size: 0.85rem; color: var(--subtitle); margin: 0.1rem 0; }
 
     .inline-small-btn {
       padding: 0.3rem 0.7rem;
@@ -239,41 +206,49 @@
         <input id="targetPercent" type="number" value="30" min="1" max="100" step="1" />
       </div>
 
-      <div>
-        <span class="controls-block-title">Allocation strategy:</span>
-        <label class="radio-label">
-          <input type="radio" name="allocationMode" value="score" checked />
-          Focus on score (highest utilization first)
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="allocationMode" value="quick" />
-          Quick wins (smallest amount to target first)
-        </label>
+      <div class="controls-group behavior">
+        <span class="controls-block-title">Payment behavior</span>
+
+        <div>
+          <span class="controls-block-title" style="font-weight:500;">Allocation strategy:</span>
+          <label class="radio-label">
+            <input type="radio" name="allocationMode" value="score" checked />
+            Focus on score (highest utilization first)
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="allocationMode" value="quick" />
+            Quick wins (smallest amount to target first)
+          </label>
+        </div>
+
+        <div style="margin-top: 0.35rem;">
+          <label class="checkbox-label">
+            <input type="checkbox" id="useRemainder" checked />
+            After hitting targets, put leftover toward the highest-utilization card
+          </label>
+        </div>
       </div>
 
-      <div>
-        <label class="checkbox-label">
-          <input type="checkbox" id="useRemainder" checked />
-          After hitting targets, put leftover toward the highest-utilization card
-        </label>
-      </div>
+      <div class="controls-group storage">
+        <span class="controls-block-title">Saving &amp; privacy (optional)</span>
 
-      <div>
-        <label class="checkbox-label">
-          <input type="checkbox" id="saveEnabled" />
-          Save my data on this device (local storage only)
-        </label>
-        <button id="clearSavedBtn" class="inline-small-btn secondary" type="button">
-          Clear saved data
-        </button>
-      </div>
+        <div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="saveEnabled" />
+            Save my data on this device (local storage only)
+          </label>
+          <button id="clearSavedBtn" class="inline-small-btn secondary" type="button">
+            Clear saved data
+          </button>
+        </div>
 
-      <p style="font-size: 0.8rem; color: var(--subtitle); margin-top: 0.3rem;">
-        <strong>About saving:</strong> Turning on “Save my data on this device” stores your card names, balances,
-        and settings locally in this browser using <code>localStorage</code>. It never leaves your computer or gets
-        uploaded anywhere. Turning it off clears the saved data immediately. If you use a shared or public computer,
-        leave this option off or clear data when done.
-      </p>
+        <p style="font-size: 0.8rem; color: var(--subtitle); margin-top: 0.3rem;">
+          <strong>About saving:</strong> Turning on “Save my data on this device” stores your card names, balances,
+          and settings locally in this browser using <code>localStorage</code>. It never leaves your computer or gets
+          uploaded anywhere. Turning it off clears the saved data immediately. If you use a shared or public computer,
+          leave this option off or clear data when done.
+        </p>
+      </div>
     </div>
 
     <table id="cardsTable">
@@ -356,19 +331,17 @@
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
-      tr.innerHTML = ''
-        + '<td><input type="text" placeholder="Card 1" class="name" /></td>'
-        + '<td><input type="number" placeholder="1000" step="0.01" class="limit" /></td>'
-        + '<td><input type="number" placeholder="250" step="0.01" class="balance" /></td>'
-        + '<td class="utilCell">—</td>'
-        + '<td class="payCell">—</td>';
+      tr.innerHTML =
+        '<td><input type="text" placeholder="Card 1" class="name" /></td>' +
+        '<td><input type="number" placeholder="1000" step="0.01" class="limit" /></td>' +
+        '<td><input type="number" placeholder="250" step="0.01" class="balance" /></td>' +
+        '<td class="utilCell">—</td>' +
+        '<td class="payCell">—</td>';
       cardsBody.appendChild(tr);
     }
 
     // Start with 3 blank rows
-    for (let i = 0; i < 3; i++) {
-      addEmptyRow();
-    }
+    for (let i = 0; i < 3; i++) addEmptyRow();
 
     function getAllocationMode() {
       const modeInput = document.querySelector('input[name="allocationMode"]:checked');
@@ -386,18 +359,16 @@
     function collectState() {
       const rows = Array.from(cardsBody.querySelectorAll('tr'));
       const cards = rows
-        .map(function (row) {
+        .map(row => {
           const name = row.querySelector('.name').value || '';
           const limit = parseFloat(row.querySelector('.limit').value) || 0;
           const balance = parseFloat(row.querySelector('.balance').value) || 0;
-          return { name: name, limit: limit, balance: balance };
+          return { name, limit, balance };
         })
-        .filter(function (card) {
-          return card.name.trim() !== '' || card.limit > 0 || card.balance > 0;
-        });
+        .filter(card => card.name.trim() !== '' || card.limit > 0 || card.balance > 0);
 
       return {
-        cards: cards,
+        cards,
         targetPercent: getTargetPercent(),
         availablePayment: parseFloat(availableInput.value) || 0,
         allocationMode: getAllocationMode(),
@@ -408,9 +379,7 @@
     function saveState() {
       if (!saveEnabledCheckbox.checked) return;
       try {
-        const state = collectState();
-        const json = JSON.stringify(state);
-        localStorage.setItem(STORAGE_KEY, json);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
       } catch (e) {
         console.warn('Could not save state:', e);
       }
@@ -420,48 +389,39 @@
       let raw;
       try {
         raw = localStorage.getItem(STORAGE_KEY);
-      } catch (e) {
-        return;
-      }
+      } catch (e) { return; }
       if (!raw) return;
 
       let state;
       try {
         state = JSON.parse(raw);
-      } catch (e) {
-        return;
-      }
+      } catch (e) { return; }
       if (!state || typeof state !== 'object') return;
 
-      // Since there is saved data, assume user had saving enabled
       saveEnabledCheckbox.checked = true;
 
-      if (typeof state.targetPercent === 'number') {
-        targetInput.value = state.targetPercent;
-      }
-      if (typeof state.availablePayment === 'number' && !isNaN(state.availablePayment)) {
+      if (typeof state.targetPercent === 'number') targetInput.value = state.targetPercent;
+      if (typeof state.availablePayment === 'number' && !isNaN(state.availablePayment))
         availableInput.value = state.availablePayment;
-      }
+
       if (state.allocationMode === 'quick' || state.allocationMode === 'score') {
         const radio = document.querySelector(
           'input[name="allocationMode"][value="' + state.allocationMode + '"]'
         );
         if (radio) radio.checked = true;
       }
-      if (typeof state.useRemainder === 'boolean') {
-        remainderCheckbox.checked = state.useRemainder;
-      }
+      if (typeof state.useRemainder === 'boolean') remainderCheckbox.checked = state.useRemainder;
 
       if (Array.isArray(state.cards) && state.cards.length > 0) {
         cardsBody.innerHTML = '';
-        state.cards.forEach(function (card) {
+        state.cards.forEach(card => {
           const tr = document.createElement('tr');
-          tr.innerHTML = ''
-            + '<td><input type="text" class="name" /></td>'
-            + '<td><input type="number" step="0.01" class="limit" /></td>'
-            + '<td><input type="number" step="0.01" class="balance" /></td>'
-            + '<td class="utilCell">—</td>'
-            + '<td class="payCell">—</td>';
+          tr.innerHTML =
+            '<td><input type="text" class="name" /></td>' +
+            '<td><input type="number" step="0.01" class="limit" /></td>' +
+            '<td><input type="number" step="0.01" class="balance" /></td>' +
+            '<td class="utilCell">—</td>' +
+            '<td class="payCell">—</td>';
           cardsBody.appendChild(tr);
           tr.querySelector('.name').value = card.name || '';
           tr.querySelector('.limit').value =
@@ -480,7 +440,7 @@
 
       const rows = Array.from(cardsBody.querySelectorAll('tr'));
 
-      rows.forEach(function (row) {
+      rows.forEach(row => {
         const limitInput = row.querySelector('.limit');
         const balanceInput = row.querySelector('.balance');
         const utilCell = row.querySelector('.utilCell');
@@ -498,11 +458,9 @@
           const paymentNeeded = Math.max(0, balance - targetBalance);
 
           utilCell.textContent = util.toFixed(1) + '%';
-          if (paymentNeeded > 0) {
-            payCell.textContent = '$' + paymentNeeded.toFixed(2);
-          } else {
-            payCell.textContent = 'At/Below';
-          }
+          payCell.textContent = paymentNeeded > 0
+            ? '$' + paymentNeeded.toFixed(2)
+            : 'At/Below';
         } else {
           utilCell.textContent = '—';
           payCell.textContent = '—';
@@ -512,64 +470,42 @@
       if (totalLimit > 0) {
         const overallUtil = (totalBalance / totalLimit) * 100;
         summaryText.textContent =
-          'Total limit: $' +
-          totalLimit.toFixed(2) +
-          ' | Total balance: $' +
-          totalBalance.toFixed(2) +
-          ' | Overall utilization: ' +
-          overallUtil.toFixed(1) +
-          '%';
+          'Total limit: $' + totalLimit.toFixed(2) +
+          ' | Total balance: $' + totalBalance.toFixed(2) +
+          ' | Overall utilization: ' + overallUtil.toFixed(1) + '%';
       } else {
         summaryText.textContent = '';
       }
 
-      // Allocation suggestion
       allocationAdvice.textContent = '';
       const available = parseFloat(availableInput.value) || 0;
-      if (available <= 0 || totalLimit <= 0) {
-        return;
-      }
+      if (available <= 0 || totalLimit <= 0) return;
 
       const suggestions = [];
-      rows.forEach(function (row) {
+      rows.forEach(row => {
         const name = row.querySelector('.name').value || 'Unnamed card';
         const limit = parseFloat(row.querySelector('.limit').value) || 0;
         const balance = parseFloat(row.querySelector('.balance').value) || 0;
-
         if (limit > 0 && balance > 0) {
           const util = (balance / limit) * 100;
           const targetBalance = limit * targetRatio;
           const payToTarget = Math.max(0, balance - targetBalance);
-
-          suggestions.push({
-            name: name,
-            util: util,
-            payToTarget: payToTarget,
-            limit: limit,
-            balance: balance
-          });
+          suggestions.push({ name, util, payToTarget, limit, balance });
         }
       });
-
-      if (suggestions.length === 0) return;
+      if (!suggestions.length) return;
 
       const mode = getAllocationMode();
       const useRemainder = remainderCheckbox.checked;
 
       if (mode === 'quick') {
-        // Smallest amount to target first; tie-breaker = higher utilization
-        suggestions.sort(function (a, b) {
-          if (a.payToTarget === b.payToTarget) {
-            return b.util - a.util;
-          }
+        suggestions.sort((a, b) => {
+          if (a.payToTarget === b.payToTarget) return b.util - a.util;
           return a.payToTarget - b.payToTarget;
         });
       } else {
-        // Focus on score: highest utilization first; tie-breaker = smaller payToTarget
-        suggestions.sort(function (a, b) {
-          if (b.util === a.util) {
-            return a.payToTarget - b.payToTarget;
-          }
+        suggestions.sort((a, b) => {
+          if (b.util === a.util) return a.payToTarget - b.payToTarget;
           return b.util - a.util;
         });
       }
@@ -577,53 +513,44 @@
       let remaining = available;
       const steps = [];
 
-      // First pass: pay to target
-      suggestions.forEach(function (card) {
+      suggestions.forEach(card => {
         if (remaining <= 0 || card.payToTarget <= 0) return;
         const pay = Math.min(card.payToTarget, remaining);
         steps.push('Pay about $' + pay.toFixed(2) + ' to ' + card.name);
         remaining -= pay;
       });
 
-      // Second pass: leftover toward highest-util card
       if (remaining > 0 && useRemainder) {
-        const highest = suggestions
-          .slice()
-          .sort(function (a, b) { return b.util - a.util; })[0];
-        if (highest && remaining > 0) {
+        const highest = suggestions.slice().sort((a, b) => b.util - a.util)[0];
+        if (highest) {
           steps.push(
             'Then put the remaining $' +
             remaining.toFixed(2) +
-            ' toward ' +
-            highest.name +
+            ' toward ' + highest.name +
             ' to reduce overall debt.'
           );
           remaining = 0;
         }
       }
 
-      if (steps.length > 0) {
-        allocationAdvice.textContent =
-          'With $' + available.toFixed(2) + ', you could: ' + steps.join(' → ');
-      } else {
-        allocationAdvice.textContent =
-          'No clear allocation needed based on the current balances and target.';
-      }
+      allocationAdvice.textContent = steps.length
+        ? 'With $' + available.toFixed(2) + ', you could: ' + steps.join(' → ')
+        : 'No clear allocation needed based on the current balances and target.';
     }
 
-    addRowBtn.addEventListener('click', function () {
+    addRowBtn.addEventListener('click', () => {
       addEmptyRow();
       saveState();
     });
 
-    calculateBtn.addEventListener('click', function () {
+    calculateBtn.addEventListener('click', () => {
       recalcAndSuggest();
       saveState();
     });
 
-    clearBtn.addEventListener('click', function () {
+    clearBtn.addEventListener('click', () => {
       const rows = Array.from(cardsBody.querySelectorAll('tr'));
-      rows.forEach(function (row) {
+      rows.forEach(row => {
         row.querySelector('.name').value = '';
         row.querySelector('.limit').value = '';
         row.querySelector('.balance').value = '';
@@ -636,29 +563,25 @@
       saveState();
     });
 
-    modeToggle.addEventListener('click', function () {
+    modeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
       modeToggle.querySelector('span').textContent = isDark ? 'Light mode' : 'Dark mode';
     });
 
-    saveEnabledCheckbox.addEventListener('change', function () {
+    saveEnabledCheckbox.addEventListener('change', () => {
       if (!saveEnabledCheckbox.checked) {
-        try {
-          localStorage.removeItem(STORAGE_KEY);
-        } catch (e) {}
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
       } else {
         saveState();
       }
     });
 
-    clearSavedBtn.addEventListener('click', function () {
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch (e) {}
+    clearSavedBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
       saveEnabledCheckbox.checked = false;
       const rows = Array.from(cardsBody.querySelectorAll('tr'));
-      rows.forEach(function (row) {
+      rows.forEach(row => {
         row.querySelector('.name').value = '';
         row.querySelector('.limit').value = '';
         row.querySelector('.balance').value = '';
@@ -670,25 +593,22 @@
       availableInput.value = '';
     });
 
-    // Save on various inputs changing
+    // Save on inputs changing
     targetInput.addEventListener('input', saveState);
     availableInput.addEventListener('input', saveState);
     remainderCheckbox.addEventListener('change', saveState);
-    document.querySelectorAll('input[name="allocationMode"]').forEach(function (radio) {
-      radio.addEventListener('change', saveState);
+    document.querySelectorAll('input[name="allocationMode"]').forEach(r => {
+      r.addEventListener('change', saveState);
     });
-
-    cardsBody.addEventListener('input', function (event) {
+    cardsBody.addEventListener('input', e => {
       if (
-        event.target.classList.contains('name') ||
-        event.target.classList.contains('limit') ||
-        event.target.classList.contains('balance')
-      ) {
-        saveState();
-      }
+        e.target.classList.contains('name') ||
+        e.target.classList.contains('limit') ||
+        e.target.classList.contains('balance')
+      ) saveState();
     });
 
-    // Load any saved state on page load
+    // Load saved state if present
     loadState();
   </script>
 </body>
