@@ -44,14 +44,17 @@
       color: var(--text);
       transition: background 0.2s ease, color 0.2s ease;
     }
+
     h1 {
       margin-bottom: 0.25rem;
     }
+
     .subtitle {
       font-size: 0.9rem;
       color: var(--subtitle);
       margin-bottom: 1rem;
     }
+
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -60,6 +63,7 @@
       margin-bottom: 0.75rem;
       flex-wrap: wrap;
     }
+
     .mode-toggle {
       padding: 0.35rem 0.75rem;
       border-radius: 999px;
@@ -70,10 +74,12 @@
       font-size: 0.85rem;
       white-space: nowrap;
     }
+
     .mode-toggle span {
       margin-left: 0.25rem;
       font-size: 0.8rem;
     }
+
     .card {
       background: var(--card-bg);
       padding: 1rem;
@@ -82,20 +88,24 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.12);
       border: 1px solid var(--border);
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 0.5rem;
     }
+
     th, td {
       border-bottom: 1px solid var(--border);
       padding: 0.4rem;
       font-size: 0.9rem;
       text-align: left;
     }
+
     th {
       background: var(--table-header-bg);
     }
+
     input[type="text"], input[type="number"] {
       width: 100%;
       box-sizing: border-box;
@@ -105,9 +115,11 @@
       border: 1px solid var(--border);
       color: var(--text);
     }
+
     input::placeholder {
       color: var(--subtitle);
     }
+
     button {
       padding: 0.5rem 1rem;
       border-radius: 6px;
@@ -115,42 +127,50 @@
       cursor: pointer;
       font-size: 0.9rem;
     }
+
     .primary {
       background: var(--primary-btn-bg);
       color: var(--primary-btn-text);
       margin-top: 0.5rem;
     }
+
     .secondary {
       background: var(--secondary-btn-bg);
       color: var(--secondary-btn-text);
       margin-left: 0.5rem;
       margin-top: 0.5rem;
     }
+
     .summary {
       font-size: 0.9rem;
       margin-top: 0.5rem;
       color: var(--summary);
     }
+
     .footnote {
       font-size: 0.8rem;
       color: var(--footnote);
       margin-top: 0.75rem;
     }
+
     .controls {
       margin-bottom: 0.75rem;
       display: grid;
       gap: 0.5rem;
     }
+
     .controls label {
       font-size: 0.85rem;
       color: var(--subtitle);
     }
+
     .controls-block-title {
       font-size: 0.85rem;
       color: var(--subtitle);
       display: block;
       margin-bottom: 0.25rem;
     }
+
     .radio-label,
     .checkbox-label {
       font-size: 0.85rem;
@@ -158,29 +178,42 @@
       display: block;
       margin-top: 0.15rem;
     }
+
     .privacy-card h2 {
       margin-top: 0;
       margin-bottom: 0.5rem;
       font-size: 1rem;
     }
+
     .privacy-card p {
       font-size: 0.85rem;
       color: var(--subtitle);
       margin: 0.25rem 0;
     }
+
     .privacy-card ul {
       padding-left: 1.1rem;
       margin: 0.25rem 0;
     }
+
     .privacy-card li {
       font-size: 0.85rem;
       color: var(--subtitle);
       margin: 0.1rem 0;
     }
+
     .inline-small-btn {
       padding: 0.3rem 0.7rem;
       font-size: 0.8rem;
       margin-left: 0.5rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--subtitle);
+      margin-top: 1.5rem;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -190,7 +223,7 @@
     <div>
       <h1>Credit Utilization Helper</h1>
       <p class="subtitle">
-        Enter your card details below to see utilization and how much to pay to reach a target % on each card.
+        Enter your card details to see utilization and how much to pay to reach a target %.  
         By default, nothing is saved when you leave or refresh this page.
       </p>
     </div>
@@ -202,17 +235,8 @@
   <div class="card">
     <div class="controls">
       <div>
-        <label for="targetPercent">
-          Target utilization per card (%):
-        </label>
-        <input
-          id="targetPercent"
-          type="number"
-          value="30"
-          min="1"
-          max="100"
-          step="1"
-        />
+        <label for="targetPercent">Target utilization per card (%):</label>
+        <input id="targetPercent" type="number" value="30" min="1" max="100" step="1" />
       </div>
 
       <div>
@@ -243,6 +267,13 @@
           Clear saved data
         </button>
       </div>
+
+      <p style="font-size: 0.8rem; color: var(--subtitle); margin-top: 0.3rem;">
+        <strong>About saving:</strong> Turning on “Save my data on this device” stores your card names, balances,
+        and settings locally in this browser using <code>localStorage</code>. It never leaves your computer or gets
+        uploaded anywhere. Turning it off clears the saved data immediately. If you use a shared or public computer,
+        leave this option off or clear data when done.
+      </p>
     </div>
 
     <table id="cardsTable">
@@ -256,7 +287,7 @@
         </tr>
       </thead>
       <tbody id="cardsBody">
-        <!-- Rows added dynamically -->
+        <!-- rows go here -->
       </tbody>
     </table>
 
@@ -267,9 +298,7 @@
     <p class="summary" id="summaryText"></p>
 
     <div style="margin-top: 0.75rem;">
-      <label for="availablePayment">
-        Optional: how much can you pay in total right now? ($)
-      </label>
+      <label for="availablePayment">Optional: how much can you pay in total right now? ($)</label>
       <input
         id="availablePayment"
         type="number"
@@ -281,34 +310,33 @@
     </div>
 
     <p class="footnote">
-      This page only helps you see the math; it is not financial advice.
+      This page only helps you see the math; it is not financial advice.  
       Always follow your card issuer’s terms and talk to a professional if you need personalized guidance.
     </p>
   </div>
 
-  <!-- Privacy & Safety section -->
   <div class="card privacy-card">
     <h2>Privacy &amp; Safety</h2>
-    <p>
-      This tool is designed to be simple and privacy-friendly:
-    </p>
+    <p>This tool is designed to be simple and privacy-friendly:</p>
     <ul>
-      <li>Everything runs in your browser. By default, nothing you type is stored when you leave or refresh.</li>
-      <li>If you turn on <strong>"Save my data on this device"</strong>, your card names, limits, balances, and settings are stored locally in this browser using local storage.</li>
-      <li>Nothing is sent to any external server by this page, and there is no login or account.</li>
+      <li>Everything runs in your browser. By default, nothing is stored when you leave or refresh.</li>
+      <li>If you enable <strong>"Save my data on this device"</strong>, data stays only in this browser using local storage.</li>
+      <li>No data is uploaded, tracked, or shared with any external server.</li>
     </ul>
-    <p>
-      For your safety:
-    </p>
+    <p>For your safety:</p>
     <ul>
-      <li>Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, Social Security numbers, or other sensitive personal data.</li>
-      <li>Card names can be generic (for example, “Card 1”, “Blue card”, “Store card”).</li>
+      <li>Do <strong>not</strong> enter full card numbers, CVV/CVC codes, bank logins, or SSNs.</li>
+      <li>Card names can be generic (e.g., “Card 1”, “Blue card”).</li>
       <li>Only card limits and balances are needed to calculate utilization.</li>
     </ul>
-    <p>
-      If you are using this on a shared or public device, avoid enabling saving or clear saved data when you are done.
-    </p>
+    <p>If you’re on a shared or public device, avoid saving or clear data when finished.</p>
   </div>
+
+  <footer>
+    © 2025 Credit Utilization Helper — built for education and personal finance awareness.<br />
+    This tool provides estimates only and does not offer financial, legal, or credit repair advice.<br />
+    Always verify results with your financial institution or credit bureau.
+  </footer>
 
   <script>
     const STORAGE_KEY = 'creditUtilHelperState';
@@ -328,19 +356,16 @@
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
-
-      tr.innerHTML = `
-        <td><input type="text" placeholder="Card 1" class="name" /></td>
-        <td><input type="number" placeholder="1000" step="0.01" class="limit" /></td>
-        <td><input type="number" placeholder="250" step="0.01" class="balance" /></td>
-        <td class="utilCell">—</td>
-        <td class="payCell">—</td>
-      `;
-
+      tr.innerHTML = ''
+        + '<td><input type="text" placeholder="Card 1" class="name" /></td>'
+        + '<td><input type="number" placeholder="1000" step="0.01" class="limit" /></td>'
+        + '<td><input type="number" placeholder="250" step="0.01" class="balance" /></td>'
+        + '<td class="utilCell">—</td>'
+        + '<td class="payCell">—</td>';
       cardsBody.appendChild(tr);
     }
 
-    // Initial blank rows (will be overridden if we load saved state)
+    // Start with 3 blank rows
     for (let i = 0; i < 3; i++) {
       addEmptyRow();
     }
@@ -351,47 +376,41 @@
     }
 
     function getTargetPercent() {
-      let targetPercentValue = parseFloat(targetInput.value);
-      if (isNaN(targetPercentValue)) targetPercentValue = 30;
-      targetPercentValue = Math.max(1, Math.min(100, targetPercentValue));
-      targetInput.value = targetPercentValue; // normalize in UI
-      return targetPercentValue;
+      let val = parseFloat(targetInput.value);
+      if (isNaN(val)) val = 30;
+      val = Math.max(1, Math.min(100, val));
+      targetInput.value = val;
+      return val;
     }
 
     function collectState() {
       const rows = Array.from(cardsBody.querySelectorAll('tr'));
-      const cards = rows.map(row => {
-        const name = row.querySelector('.name').value || '';
-        const limit = parseFloat(row.querySelector('.limit').value) || 0;
-        const balance = parseFloat(row.querySelector('.balance').value) || 0;
-        return { name, limit, balance };
-      }).filter(card =>
-        card.name.trim() !== '' || card.limit > 0 || card.balance > 0
-      );
-
-      const targetPercent = getTargetPercent();
-      const availablePayment = parseFloat(availableInput.value) || 0;
-      const allocationMode = getAllocationMode();
-      const useRemainder = remainderCheckbox && remainderCheckbox.checked;
-      const darkMode = document.body.classList.contains('dark-mode');
-      const saveEnabled = saveEnabledCheckbox && saveEnabledCheckbox.checked;
+      const cards = rows
+        .map(function (row) {
+          const name = row.querySelector('.name').value || '';
+          const limit = parseFloat(row.querySelector('.limit').value) || 0;
+          const balance = parseFloat(row.querySelector('.balance').value) || 0;
+          return { name: name, limit: limit, balance: balance };
+        })
+        .filter(function (card) {
+          return card.name.trim() !== '' || card.limit > 0 || card.balance > 0;
+        });
 
       return {
-        cards,
-        targetPercent,
-        availablePayment,
-        allocationMode,
-        useRemainder,
-        darkMode,
-        saveEnabled
+        cards: cards,
+        targetPercent: getTargetPercent(),
+        availablePayment: parseFloat(availableInput.value) || 0,
+        allocationMode: getAllocationMode(),
+        useRemainder: remainderCheckbox.checked
       };
     }
 
     function saveState() {
-      if (!saveEnabledCheckbox || !saveEnabledCheckbox.checked) return;
+      if (!saveEnabledCheckbox.checked) return;
       try {
         const state = collectState();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        const json = JSON.stringify(state);
+        localStorage.setItem(STORAGE_KEY, json);
       } catch (e) {
         console.warn('Could not save state:', e);
       }
@@ -412,62 +431,37 @@
       } catch (e) {
         return;
       }
-
       if (!state || typeof state !== 'object') return;
 
-      // Save enabled
-      if (typeof state.saveEnabled === 'boolean' && saveEnabledCheckbox) {
-        saveEnabledCheckbox.checked = state.saveEnabled;
-      }
+      // Since there is saved data, assume user had saving enabled
+      saveEnabledCheckbox.checked = true;
 
-      // Target percent
       if (typeof state.targetPercent === 'number') {
         targetInput.value = state.targetPercent;
       }
-
-      // Available payment
       if (typeof state.availablePayment === 'number' && !isNaN(state.availablePayment)) {
         availableInput.value = state.availablePayment;
       }
-
-      // Allocation mode
       if (state.allocationMode === 'quick' || state.allocationMode === 'score') {
         const radio = document.querySelector(
-          `input[name="allocationMode"][value="${state.allocationMode}"]`
+          'input[name="allocationMode"][value="' + state.allocationMode + '"]'
         );
-        if (radio) {
-          radio.checked = true;
-        }
+        if (radio) radio.checked = true;
       }
-
-      // Remainder checkbox
-      if (typeof state.useRemainder === 'boolean' && remainderCheckbox) {
+      if (typeof state.useRemainder === 'boolean') {
         remainderCheckbox.checked = state.useRemainder;
       }
 
-      // Dark mode
-      if (typeof state.darkMode === 'boolean') {
-        if (state.darkMode) {
-          document.body.classList.add('dark-mode');
-        } else {
-          document.body.classList.remove('dark-mode');
-        }
-        const isDark = document.body.classList.contains('dark-mode');
-        modeToggle.querySelector('span').textContent = isDark ? 'Light mode' : 'Dark mode';
-      }
-
-      // Cards
       if (Array.isArray(state.cards) && state.cards.length > 0) {
         cardsBody.innerHTML = '';
-        state.cards.forEach(card => {
+        state.cards.forEach(function (card) {
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><input type="text" class="name" /></td>
-            <td><input type="number" step="0.01" class="limit" /></td>
-            <td><input type="number" step="0.01" class="balance" /></td>
-            <td class="utilCell">—</td>
-            <td class="payCell">—</td>
-          `;
+          tr.innerHTML = ''
+            + '<td><input type="text" class="name" /></td>'
+            + '<td><input type="number" step="0.01" class="limit" /></td>'
+            + '<td><input type="number" step="0.01" class="balance" /></td>'
+            + '<td class="utilCell">—</td>'
+            + '<td class="payCell">—</td>';
           cardsBody.appendChild(tr);
           tr.querySelector('.name').value = card.name || '';
           tr.querySelector('.limit').value =
@@ -478,28 +472,22 @@
       }
     }
 
-    addRowBtn.addEventListener('click', () => {
-      addEmptyRow();
-      saveState();
-    });
-
-    calculateBtn.addEventListener('click', () => {
+    function recalcAndSuggest() {
       let totalLimit = 0;
       let totalBalance = 0;
+      const targetPercent = getTargetPercent();
+      const targetRatio = targetPercent / 100;
 
-      const targetPercentValue = getTargetPercent();
-      const targetRatio = targetPercentValue / 100;
+      const rows = Array.from(cardsBody.querySelectorAll('tr'));
 
-      const rows = cardsBody.querySelectorAll('tr');
-
-      rows.forEach(row => {
-        const limitInputEl = row.querySelector('.limit');
-        const balanceInputEl = row.querySelector('.balance');
+      rows.forEach(function (row) {
+        const limitInput = row.querySelector('.limit');
+        const balanceInput = row.querySelector('.balance');
         const utilCell = row.querySelector('.utilCell');
         const payCell = row.querySelector('.payCell');
 
-        const limit = parseFloat(limitInputEl.value) || 0;
-        const balance = parseFloat(balanceInputEl.value) || 0;
+        const limit = parseFloat(limitInput.value) || 0;
+        const balance = parseFloat(balanceInput.value) || 0;
 
         if (limit > 0 || balance > 0) {
           totalLimit += limit;
@@ -509,11 +497,11 @@
           const targetBalance = limit * targetRatio;
           const paymentNeeded = Math.max(0, balance - targetBalance);
 
-          utilCell.textContent = `${util.toFixed(1)}%`;
+          utilCell.textContent = util.toFixed(1) + '%';
           if (paymentNeeded > 0) {
-            payCell.textContent = `$${paymentNeeded.toFixed(2)}`;
+            payCell.textContent = '$' + paymentNeeded.toFixed(2);
           } else {
-            payCell.textContent = 'At or below target';
+            payCell.textContent = 'At/Below';
           }
         } else {
           utilCell.textContent = '—';
@@ -524,30 +512,29 @@
       if (totalLimit > 0) {
         const overallUtil = (totalBalance / totalLimit) * 100;
         summaryText.textContent =
-          `Total limit: $${totalLimit.toFixed(2)} | ` +
-          `Total balance: $${totalBalance.toFixed(2)} | ` +
-          `Overall utilization: ${overallUtil.toFixed(1)}%`;
+          'Total limit: $' +
+          totalLimit.toFixed(2) +
+          ' | Total balance: $' +
+          totalBalance.toFixed(2) +
+          ' | Overall utilization: ' +
+          overallUtil.toFixed(1) +
+          '%';
       } else {
         summaryText.textContent = '';
       }
 
-      // Allocation suggestion based on available payment
+      // Allocation suggestion
       allocationAdvice.textContent = '';
       const available = parseFloat(availableInput.value) || 0;
       if (available <= 0 || totalLimit <= 0) {
-        saveState();
         return;
       }
 
       const suggestions = [];
-      const rowsArray = Array.from(cardsBody.querySelectorAll('tr'));
-
-      rowsArray.forEach(row => {
+      rows.forEach(function (row) {
         const name = row.querySelector('.name').value || 'Unnamed card';
-        const limitInputEl = row.querySelector('.limit');
-        const balanceInputEl = row.querySelector('.balance');
-        const limit = parseFloat(limitInputEl.value) || 0;
-        const balance = parseFloat(balanceInputEl.value) || 0;
+        const limit = parseFloat(row.querySelector('.limit').value) || 0;
+        const balance = parseFloat(row.querySelector('.balance').value) || 0;
 
         if (limit > 0 && balance > 0) {
           const util = (balance / limit) * 100;
@@ -555,28 +542,23 @@
           const payToTarget = Math.max(0, balance - targetBalance);
 
           suggestions.push({
-            name,
-            util,
-            payToTarget,
-            limit,
-            balance
+            name: name,
+            util: util,
+            payToTarget: payToTarget,
+            limit: limit,
+            balance: balance
           });
         }
       });
 
-      if (suggestions.length === 0) {
-        allocationAdvice.textContent = '';
-        saveState();
-        return;
-      }
+      if (suggestions.length === 0) return;
 
       const mode = getAllocationMode();
-      const useRemainder = remainderCheckbox && remainderCheckbox.checked;
+      const useRemainder = remainderCheckbox.checked;
 
-      // Sort suggestions according to chosen strategy
       if (mode === 'quick') {
         // Smallest amount to target first; tie-breaker = higher utilization
-        suggestions.sort((a, b) => {
+        suggestions.sort(function (a, b) {
           if (a.payToTarget === b.payToTarget) {
             return b.util - a.util;
           }
@@ -584,7 +566,7 @@
         });
       } else {
         // Focus on score: highest utilization first; tie-breaker = smaller payToTarget
-        suggestions.sort((a, b) => {
+        suggestions.sort(function (a, b) {
           if (b.util === a.util) {
             return a.payToTarget - b.payToTarget;
           }
@@ -595,20 +577,26 @@
       let remaining = available;
       const steps = [];
 
-      // First pass: only pay up to target on cards that are above target
-      suggestions.forEach(card => {
+      // First pass: pay to target
+      suggestions.forEach(function (card) {
         if (remaining <= 0 || card.payToTarget <= 0) return;
         const pay = Math.min(card.payToTarget, remaining);
-        steps.push(`Pay about $${pay.toFixed(2)} to ${card.name}`);
+        steps.push('Pay about $' + pay.toFixed(2) + ' to ' + card.name);
         remaining -= pay;
       });
 
-      // Second pass: leftover toward highest-utilization card if enabled
+      // Second pass: leftover toward highest-util card
       if (remaining > 0 && useRemainder) {
-        const highestUtilCard = suggestions.slice().sort((a, b) => b.util - a.util)[0];
-        if (highestUtilCard && remaining > 0) {
+        const highest = suggestions
+          .slice()
+          .sort(function (a, b) { return b.util - a.util; })[0];
+        if (highest && remaining > 0) {
           steps.push(
-            `Then put the remaining $${remaining.toFixed(2)} toward ${highestUtilCard.name} to reduce overall debt.`
+            'Then put the remaining $' +
+            remaining.toFixed(2) +
+            ' toward ' +
+            highest.name +
+            ' to reduce overall debt.'
           );
           remaining = 0;
         }
@@ -616,18 +604,26 @@
 
       if (steps.length > 0) {
         allocationAdvice.textContent =
-          `With $${available.toFixed(2)}, you could: ` + steps.join(' → ');
+          'With $' + available.toFixed(2) + ', you could: ' + steps.join(' → ');
       } else {
         allocationAdvice.textContent =
           'No clear allocation needed based on the current balances and target.';
       }
+    }
 
+    addRowBtn.addEventListener('click', function () {
+      addEmptyRow();
       saveState();
     });
 
-    clearBtn.addEventListener('click', () => {
-      const rows = cardsBody.querySelectorAll('tr');
-      rows.forEach(row => {
+    calculateBtn.addEventListener('click', function () {
+      recalcAndSuggest();
+      saveState();
+    });
+
+    clearBtn.addEventListener('click', function () {
+      const rows = Array.from(cardsBody.querySelectorAll('tr'));
+      rows.forEach(function (row) {
         row.querySelector('.name').value = '';
         row.querySelector('.limit').value = '';
         row.querySelector('.balance').value = '';
@@ -640,71 +636,60 @@
       saveState();
     });
 
-    modeToggle.addEventListener('click', () => {
+    modeToggle.addEventListener('click', function () {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
       modeToggle.querySelector('span').textContent = isDark ? 'Light mode' : 'Dark mode';
-      saveState();
     });
 
-    targetInput.addEventListener('input', () => {
-      // Just normalize & save when user changes it
-      getTargetPercent();
-      saveState();
-    });
-
-    availableInput.addEventListener('input', () => {
-      saveState();
-    });
-
-    remainderCheckbox.addEventListener('change', () => {
-      saveState();
-    });
-
-    document.querySelectorAll('input[name="allocationMode"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        saveState();
-      });
-    });
-
-    if (saveEnabledCheckbox) {
-      saveEnabledCheckbox.addEventListener('change', () => {
-        if (saveEnabledCheckbox.checked) {
-          // User opted in: save current state
-          saveState();
-        } else {
-          // User opted out: clear stored state
-          try {
-            localStorage.removeItem(STORAGE_KEY);
-          } catch (e) {}
-        }
-      });
-    }
-
-    if (clearSavedBtn) {
-      clearSavedBtn.addEventListener('click', () => {
+    saveEnabledCheckbox.addEventListener('change', function () {
+      if (!saveEnabledCheckbox.checked) {
         try {
           localStorage.removeItem(STORAGE_KEY);
         } catch (e) {}
-        saveEnabledCheckbox.checked = false;
-        // Also clear current UI data so it's obvious everything is wiped
-        const rows = cardsBody.querySelectorAll('tr');
-        rows.forEach(row => {
-          row.querySelector('.name').value = '';
-          row.querySelector('.limit').value = '';
-          row.querySelector('.balance').value = '';
-          row.querySelector('.utilCell').textContent = '—';
-          row.querySelector('.payCell').textContent = '—';
-        });
-        summaryText.textContent = '';
-        allocationAdvice.textContent = '';
-        availableInput.value = '';
-      });
-    }
+      } else {
+        saveState();
+      }
+    });
 
-    // Try to load saved state on page load
+    clearSavedBtn.addEventListener('click', function () {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+      saveEnabledCheckbox.checked = false;
+      const rows = Array.from(cardsBody.querySelectorAll('tr'));
+      rows.forEach(function (row) {
+        row.querySelector('.name').value = '';
+        row.querySelector('.limit').value = '';
+        row.querySelector('.balance').value = '';
+        row.querySelector('.utilCell').textContent = '—';
+        row.querySelector('.payCell').textContent = '—';
+      });
+      summaryText.textContent = '';
+      allocationAdvice.textContent = '';
+      availableInput.value = '';
+    });
+
+    // Save on various inputs changing
+    targetInput.addEventListener('input', saveState);
+    availableInput.addEventListener('input', saveState);
+    remainderCheckbox.addEventListener('change', saveState);
+    document.querySelectorAll('input[name="allocationMode"]').forEach(function (radio) {
+      radio.addEventListener('change', saveState);
+    });
+
+    cardsBody.addEventListener('input', function (event) {
+      if (
+        event.target.classList.contains('name') ||
+        event.target.classList.contains('limit') ||
+        event.target.classList.contains('balance')
+      ) {
+        saveState();
+      }
+    });
+
+    // Load any saved state on page load
     loadState();
   </script>
-
 </body>
 </html>
