@@ -136,16 +136,24 @@
       color: var(--footnote);
       margin-top: 0.75rem;
     }
+    .controls {
+      margin-bottom: 0.75rem;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .controls label {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+    }
   </style>
 </head>
 <body class="dark-mode">
-
 
   <div class="top-bar">
     <div>
       <h1>Credit Utilization Helper</h1>
       <p class="subtitle">
-        Enter your card details below to see utilization and how much to pay to reach 30% on each card.
+        Enter your card details below to see utilization and how much to pay to reach a target % on each card.
         Nothing is saved; data clears when you refresh or close the page.
       </p>
     </div>
@@ -155,6 +163,22 @@
   </div>
 
   <div class="card">
+    <div class="controls">
+      <div>
+        <label for="targetPercent">
+          Target utilization per card (%):
+        </label>
+        <input
+          id="targetPercent"
+          type="number"
+          value="30"
+          min="1"
+          max="100"
+          step="1"
+        />
+      </div>
+    </div>
+
     <table id="cardsTable">
       <thead>
         <tr>
@@ -162,18 +186,34 @@
           <th>Limit ($)</th>
           <th>Balance ($)</th>
           <th>Utilization</th>
-          <th>Pay to Hit 30%</th>
+          <th>Pay to Target</th>
         </tr>
       </thead>
       <tbody id="cardsBody">
         <!-- Rows added dynamically -->
       </tbody>
     </table>
+
     <button class="primary" id="addRowBtn" type="button">Add Card Row</button>
     <button class="secondary" id="calculateBtn" type="button">Calculate</button>
     <button class="secondary" id="clearBtn" type="button">Clear All</button>
 
     <p class="summary" id="summaryText"></p>
+
+    <div style="margin-top: 0.75rem;">
+      <label for="availablePayment">
+        Optional: how much can you pay in total right now? ($)
+      </label>
+      <input
+        id="availablePayment"
+        type="number"
+        placeholder="e.g. 300"
+        step="0.01"
+        style="margin-top: 0.25rem;"
+      />
+      <p id="allocationAdvice" class="summary"></p>
+    </div>
+
     <p class="footnote">
       Tip: Many scoring models prefer individual and total utilization under about 30%.
       This page only helps you see the math; nothing is stored or transmitted.
@@ -187,6 +227,9 @@
     const clearBtn = document.getElementById('clearBtn');
     const summaryText = document.getElementById('summaryText');
     const modeToggle = document.getElementById('modeToggle');
+    const targetInput = document.getElementById('targetPercent');
+    const availableInput = document.getElementById('availablePayment');
+    const allocationAdvice = document.getElementById('allocationAdvice');
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
@@ -215,29 +258,37 @@
       let totalLimit = 0;
       let totalBalance = 0;
 
+      // Clamp and read target %
+      let targetPercentValue = parseFloat(targetInput.value);
+      if (isNaN(targetPercentValue)) targetPercentValue = 30;
+      targetPercentValue = Math.max(1, Math.min(100, targetPercentValue));
+      targetInput.value = targetPercentValue; // normalize in UI
+      const targetRatio = targetPercentValue / 100;
+
       const rows = cardsBody.querySelectorAll('tr');
+
       rows.forEach(row => {
-        const limitInput = row.querySelector('.limit');
-        const balanceInput = row.querySelector('.balance');
+        const limitInputEl = row.querySelector('.limit');
+        const balanceInputEl = row.querySelector('.balance');
         const utilCell = row.querySelector('.utilCell');
         const payCell = row.querySelector('.payCell');
 
-        const limit = parseFloat(limitInput.value) || 0;
-        const balance = parseFloat(balanceInput.value) || 0;
+        const limit = parseFloat(limitInputEl.value) || 0;
+        const balance = parseFloat(balanceInputEl.value) || 0;
 
         if (limit > 0 || balance > 0) {
           totalLimit += limit;
           totalBalance += balance;
 
           const util = limit > 0 ? (balance / limit) * 100 : 0;
-          const targetBalance = limit * 0.30;
+          const targetBalance = limit * targetRatio;
           const paymentNeeded = Math.max(0, balance - targetBalance);
 
           utilCell.textContent = `${util.toFixed(1)}%`;
           if (paymentNeeded > 0) {
             payCell.textContent = `$${paymentNeeded.toFixed(2)}`;
           } else {
-            payCell.textContent = 'Already ≤ 30%';
+            payCell.textContent = 'At or below target';
           }
         } else {
           utilCell.textContent = '—';
@@ -254,6 +305,59 @@
       } else {
         summaryText.textContent = '';
       }
+
+      // Allocation suggestion based on available payment
+      allocationAdvice.textContent = '';
+      const available = parseFloat(availableInput.value) || 0;
+      if (available <= 0 || totalLimit <= 0) {
+        return;
+      }
+
+      const suggestions = [];
+      const rowsArray = Array.from(cardsBody.querySelectorAll('tr'));
+
+      rowsArray.forEach(row => {
+        const name = row.querySelector('.name').value || 'Unnamed card';
+        const limitInputEl = row.querySelector('.limit');
+        const balanceInputEl = row.querySelector('.balance');
+        const limit = parseFloat(limitInputEl.value) || 0;
+        const balance = parseFloat(balanceInputEl.value) || 0;
+
+        if (limit > 0 && balance > 0) {
+          const util = (balance / limit) * 100;
+          const targetBalance = limit * targetRatio;
+          const payToTarget = Math.max(0, balance - targetBalance);
+
+          suggestions.push({
+            name,
+            util,
+            payToTarget
+          });
+        }
+      });
+
+      // Sort by highest utilization first
+      suggestions.sort((a, b) => b.util - a.util);
+
+      let remaining = available;
+      const steps = [];
+
+      suggestions.forEach(card => {
+        if (remaining <= 0 || card.payToTarget <= 0) return;
+        const pay = Math.min(card.payToTarget, remaining);
+        steps.push(`Pay about $${pay.toFixed(2)} to ${card.name}`);
+        remaining -= pay;
+      });
+
+      if (steps.length > 0) {
+        allocationAdvice.textContent =
+          `With $${available.toFixed(2)}, you could: ` +
+          steps.join(' → ') +
+          (remaining > 0 ? `, and still have about $${remaining.toFixed(2)} left.` : '.');
+      } else {
+        allocationAdvice.textContent =
+          'No clear allocation needed based on the current balances and target.';
+      }
     });
 
     clearBtn.addEventListener('click', () => {
@@ -266,6 +370,8 @@
         row.querySelector('.payCell').textContent = '—';
       });
       summaryText.textContent = '';
+      allocationAdvice.textContent = '';
+      availableInput.value = '';
     });
 
     modeToggle.addEventListener('click', () => {
