@@ -497,9 +497,11 @@
 
     // helper: clean numeric input (remove commas and spaces, then parse)
     function cleanNumberInput(value) {
-      if (value == null) return NaN;
-      return parseFloat(String(value).replace(/,/g, '').trim());
-    }
+  if (value == null) return NaN;
+  // Remove everything except digits, decimal point, and minus sign
+  const cleaned = String(value).replace(/[^0-9.\-]/g, '').trim();
+  return cleaned ? parseFloat(cleaned) : NaN;
+}
 
     function resetGauge() {
       if (!gaugeValueCircle) return;
