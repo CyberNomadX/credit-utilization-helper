@@ -76,8 +76,8 @@
 
   <h1>Credit Utilization Helper</h1>
   <p class="subtitle">
-    Enter your cards below to see utilization and how much to pay to reach 30% on each card.
-    Nothing is saved; numbers are cleared if you refresh or close the page.
+    Enter your card details below to see utilization and how much to pay to reach 30% on each card.
+    Nothing is saved; data clears when you refresh or close the page.
   </p>
 
   <div class="card">
@@ -92,7 +92,7 @@
         </tr>
       </thead>
       <tbody id="cardsBody">
-        <!-- Rows will be added here -->
+        <!-- Rows added dynamically -->
       </tbody>
     </table>
     <button class="primary" id="addRowBtn">Add Card Row</button>
@@ -101,8 +101,8 @@
 
     <p class="summary" id="summaryText"></p>
     <p class="footnote">
-      Tip: FICO usually prefers total utilization under ~30%, and individual cards under 30%.
-      This tool just helps you see the math more clearly.
+      Tip: Many scoring models prefer individual and total utilization under about 30%.
+      This page only helps you see the math; nothing is stored or transmitted.
     </p>
   </div>
 
@@ -117,9 +117,9 @@
       const tr = document.createElement('tr');
 
       tr.innerHTML = `
-        <td><input type="text" placeholder="Capital One Savor" class="name" /></td>
-        <td><input type="number" placeholder="2000" step="0.01" class="limit" /></td>
-        <td><input type="number" placeholder="1738.13" step="0.01" class="balance" /></td>
+        <td><input type="text" placeholder="Card 1" class="name" /></td>
+        <td><input type="number" placeholder="1000" step="0.01" class="limit" /></td>
+        <td><input type="number" placeholder="250" step="0.01" class="balance" /></td>
         <td class="utilCell">—</td>
         <td class="payCell">—</td>
       `;
@@ -182,7 +182,6 @@
     });
 
     clearBtn.addEventListener('click', () => {
-      // Clear all inputs and outputs
       const rows = cardsBody.querySelectorAll('tr');
       rows.forEach(row => {
         row.querySelector('.name').value = '';
