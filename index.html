@@ -145,6 +145,19 @@
       font-size: 0.85rem;
       color: var(--subtitle);
     }
+    .controls-block-title {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .radio-label,
+    .checkbox-label {
+      font-size: 0.85rem;
+      color: var(--subtitle);
+      display: block;
+      margin-top: 0.15rem;
+    }
   </style>
 </head>
 <body class="dark-mode">
@@ -176,6 +189,25 @@
           max="100"
           step="1"
         />
+      </div>
+
+      <div>
+        <span class="controls-block-title">Allocation strategy:</span>
+        <label class="radio-label">
+          <input type="radio" name="allocationMode" value="score" checked />
+          Focus on score (highest utilization first)
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="allocationMode" value="quick" />
+          Quick wins (smallest amount to target first)
+        </label>
+      </div>
+
+      <div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="useRemainder" checked />
+          After hitting targets, put leftover toward the highest-utilization card
+        </label>
       </div>
     </div>
 
@@ -230,6 +262,7 @@
     const targetInput = document.getElementById('targetPercent');
     const availableInput = document.getElementById('availablePayment');
     const allocationAdvice = document.getElementById('allocationAdvice');
+    const remainderCheckbox = document.getElementById('useRemainder');
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
@@ -331,17 +364,46 @@
           suggestions.push({
             name,
             util,
-            payToTarget
+            payToTarget,
+            limit,
+            balance
           });
         }
       });
 
-      // Sort by highest utilization first
-      suggestions.sort((a, b) => b.util - a.util);
+      if (suggestions.length === 0) {
+        allocationAdvice.textContent = '';
+        return;
+      }
+
+      // Determine allocation mode
+      const modeInput = document.querySelector('input[name="allocationMode"]:checked');
+      const mode = modeInput ? modeInput.value : 'score';
+      const useRemainder = remainderCheckbox && remainderCheckbox.checked;
+
+      // Sort suggestions according to chosen strategy
+      if (mode === 'quick') {
+        // Smallest amount to target first; tie-breaker = higher utilization
+        suggestions.sort((a, b) => {
+          if (a.payToTarget === b.payToTarget) {
+            return b.util - a.util;
+          }
+          return a.payToTarget - b.payToTarget;
+        });
+      } else {
+        // Focus on score: highest utilization first; tie-breaker = smaller payToTarget
+        suggestions.sort((a, b) => {
+          if (b.util === a.util) {
+            return a.payToTarget - b.payToTarget;
+          }
+          return b.util - a.util;
+        });
+      }
 
       let remaining = available;
       const steps = [];
 
+      // First pass: only pay up to target on cards that are above target
       suggestions.forEach(card => {
         if (remaining <= 0 || card.payToTarget <= 0) return;
         const pay = Math.min(card.payToTarget, remaining);
@@ -349,11 +411,20 @@
         remaining -= pay;
       });
 
+      // Second pass: if there's leftover and user wants to use it,
+      // put it toward the highest-utilization card (even if already at/below target now)
+      if (remaining > 0 && useRemainder) {
+        // Highest-utilization card from the original suggestions
+        const highestUtilCard = suggestions.slice().sort((a, b) => b.util - a.util)[0];
+        if (highestUtilCard && remaining > 0) {
+          steps.push(`Then put the remaining $${remaining.toFixed(2)} toward ${highestUtilCard.name} to reduce overall debt.`);
+          remaining = 0;
+        }
+      }
+
       if (steps.length > 0) {
         allocationAdvice.textContent =
-          `With $${available.toFixed(2)}, you could: ` +
-          steps.join(' → ') +
-          (remaining > 0 ? `, and still have about $${remaining.toFixed(2)} left.` : '.');
+          `With $${available.toFixed(2)}, you could: ` + steps.join(' → ');
       } else {
         allocationAdvice.textContent =
           'No clear allocation needed based on the current balances and target.';
