@@ -5,27 +5,80 @@
   <title>Credit Utilization Helper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --bg: #f5f5f5;
+      --text: #111827;
+      --subtitle: #555;
+      --card-bg: #ffffff;
+      --border: #dddddd;
+      --summary: #333333;
+      --footnote: #666666;
+      --primary-btn-bg: #2563eb;
+      --primary-btn-text: #ffffff;
+      --secondary-btn-bg: #e5e7eb;
+      --secondary-btn-text: #111827;
+      --table-header-bg: #f3f4f6;
+    }
+
+    body.dark-mode {
+      --bg: #020617;
+      --text: #e5e7eb;
+      --subtitle: #9ca3af;
+      --card-bg: #020617;
+      --border: #1f2937;
+      --summary: #e5e7eb;
+      --footnote: #9ca3af;
+      --primary-btn-bg: #3b82f6;
+      --primary-btn-text: #e5e7eb;
+      --secondary-btn-bg: #111827;
+      --secondary-btn-text: #e5e7eb;
+      --table-header-bg: #020617;
+    }
+
     body {
       font-family: system-ui, sans-serif;
       max-width: 900px;
       margin: 0 auto;
       padding: 1rem;
-      background: #f5f5f5;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.2s ease, color 0.2s ease;
     }
     h1 {
       margin-bottom: 0.25rem;
     }
     .subtitle {
       font-size: 0.9rem;
-      color: #555;
+      color: var(--subtitle);
       margin-bottom: 1rem;
     }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .mode-toggle {
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .mode-toggle span {
+      margin-left: 0.25rem;
+      font-size: 0.8rem;
+    }
     .card {
-      background: white;
+      background: var(--card-bg);
       padding: 1rem;
       border-radius: 8px;
       margin-bottom: 1rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+      border: 1px solid var(--border);
     }
     table {
       width: 100%;
@@ -33,15 +86,25 @@
       margin-top: 0.5rem;
     }
     th, td {
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid var(--border);
       padding: 0.4rem;
       font-size: 0.9rem;
       text-align: left;
+    }
+    th {
+      background: var(--table-header-bg);
     }
     input[type="text"], input[type="number"] {
       width: 100%;
       box-sizing: border-box;
       padding: 0.25rem;
+      background: transparent;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    input::placeholder {
+      color: var(--subtitle);
     }
     button {
       padding: 0.5rem 1rem;
@@ -51,34 +114,42 @@
       font-size: 0.9rem;
     }
     .primary {
-      background: #2563eb;
-      color: white;
+      background: var(--primary-btn-bg);
+      color: var(--primary-btn-text);
       margin-top: 0.5rem;
     }
     .secondary {
-      background: #e5e7eb;
-      color: #111827;
+      background: var(--secondary-btn-bg);
+      color: var(--secondary-btn-text);
       margin-left: 0.5rem;
+      margin-top: 0.5rem;
     }
     .summary {
       font-size: 0.9rem;
       margin-top: 0.5rem;
-      color: #333;
+      color: var(--summary);
     }
     .footnote {
       font-size: 0.8rem;
-      color: #666;
+      color: var(--footnote);
       margin-top: 0.75rem;
     }
   </style>
 </head>
 <body>
 
-  <h1>Credit Utilization Helper</h1>
-  <p class="subtitle">
-    Enter your card details below to see utilization and how much to pay to reach 30% on each card.
-    Nothing is saved; data clears when you refresh or close the page.
-  </p>
+  <div class="top-bar">
+    <div>
+      <h1>Credit Utilization Helper</h1>
+      <p class="subtitle">
+        Enter your card details below to see utilization and how much to pay to reach 30% on each card.
+        Nothing is saved; data clears when you refresh or close the page.
+      </p>
+    </div>
+    <button class="mode-toggle" id="modeToggle" type="button">
+      🌓 <span>Dark mode</span>
+    </button>
+  </div>
 
   <div class="card">
     <table id="cardsTable">
@@ -95,9 +166,9 @@
         <!-- Rows added dynamically -->
       </tbody>
     </table>
-    <button class="primary" id="addRowBtn">Add Card Row</button>
-    <button class="secondary" id="calculateBtn">Calculate</button>
-    <button class="secondary" id="clearBtn">Clear All</button>
+    <button class="primary" id="addRowBtn" type="button">Add Card Row</button>
+    <button class="secondary" id="calculateBtn" type="button">Calculate</button>
+    <button class="secondary" id="clearBtn" type="button">Clear All</button>
 
     <p class="summary" id="summaryText"></p>
     <p class="footnote">
@@ -112,6 +183,7 @@
     const calculateBtn = document.getElementById('calculateBtn');
     const clearBtn = document.getElementById('clearBtn');
     const summaryText = document.getElementById('summaryText');
+    const modeToggle = document.getElementById('modeToggle');
 
     function addEmptyRow() {
       const tr = document.createElement('tr');
@@ -162,7 +234,7 @@
           if (paymentNeeded > 0) {
             payCell.textContent = `$${paymentNeeded.toFixed(2)}`;
           } else {
-            payCell.textContent = 'Already ≤ 30%';
+            payCell.textContent = 'Already ≤ 30%`;
           }
         } else {
           utilCell.textContent = '—';
@@ -191,6 +263,12 @@
         row.querySelector('.payCell').textContent = '—';
       });
       summaryText.textContent = '';
+    });
+
+    modeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      modeToggle.querySelector('span').textContent = isDark ? 'Light mode' : 'Dark mode';
     });
   </script>
 
